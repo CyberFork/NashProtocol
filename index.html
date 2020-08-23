@@ -1,3 +1,558 @@
-Welcome to NashProtocol.
+<!-- <html>
+	<head>
+	</head>
+	<body>
+	</body>
+</html> -->
 
-Take a NAP then will be rich.
+<!-- {% verbatim myblock %} -->
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>NAPToken Test</title>
+
+  <!-- web3 -->
+  <script src="../static/js/web3.min.js"></script>
+  <script language="javascript" type="text/javascript" src="../static/js/NAPToken_ABI.js"></script>
+  <script language="javascript" type="text/javascript" src="../static/js/NAP_0_MVP_ABI.js"></script>
+
+  <!-- vue.js -->
+  <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- 生产环境版本，优化了尺寸和速度 -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+
+  <!-- Pure -->
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 强制刷新免遗留 -->
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <meta http-equiv="expires" content="0">
+
+</head>
+<style scoped>
+  .button-success,
+  .button-error,
+  .button-warning,
+  .button-secondary {
+    color: white;
+    border-radius: 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  }
+
+  .button-success {
+    background: rgb(28, 184, 65);
+    /* this is a green */
+  }
+
+  .button-error {
+    background: rgb(202, 60, 60);
+    /* this is a maroon */
+  }
+
+  .button-warning {
+    background: rgb(223, 117, 20);
+    /* this is an orange */
+  }
+
+  .button-secondary {
+    background: rgb(66, 184, 221);
+    /* this is a light blue */
+  }
+</style>
+
+<body>
+  <div id="app">
+    Token:0x6E77B74a7bbC4082264948b5f89cd8821Cf4DcA0 | DEO-MVP:0xCF923640f4fA66E67434B99532dF60282093a717<br>
+    当前区块高度：{{blockHeight}}
+    <div class="pure-g">
+      <div class="pure-u-1 pure-u-md-1-1"> —————————————————————————————————————————————————————— </div>
+    </div>
+    <!-- <form class="pure-form"> -->
+    <div class="pure-menu pure-menu-horizontal">
+      <button class="pure-button pure-button-active" @click="RefreshFunds()">🔄{{addressNow}}</button>
+      <button class="pure-button pure-button-active">NAPs In MVP : {{MVP_NapsF}}</button>
+    </div>
+    <div class="pure-menu pure-menu-horizontal">
+      <a class="pure-menu-heading pure-menu-link pure-menu-selected">NAP Funds:</a>
+      <ul class="pure-menu-list">
+        <li class="pure-menu-item"><a class="pure-menu-link" @click="v_Naps=walletBalance">{{walletBalanceF}} NAP in
+            Wallet</a></li>
+
+        <button class="button-warning pure-button" @click="withdrawFromMvp()">⬅提取</button>
+        <input type="text" placeholder="NAPS Value" v-model='v_Naps'>
+        <button class="button-secondary pure-button" @click="depositToMvp()">充值➡</button>
+        <li class="pure-menu-item"><a class="pure-menu-link" @click="v_Naps=mvp0Balance">{{mvp0BalanceF}} NAP in
+            MVP_Contract</a></li>
+        <!-- <li class="pure-menu-item"><a href="#" class="pure-menu-link">Sports</a></li>
+        <li class="pure-menu-item"><a href="#" class="pure-menu-link">Finance</a></li> -->
+      </ul>
+    </div>
+    <!-- </form> -->
+    <div class="pure-g">
+      <div class="pure-u-1 pure-u-md-1-1"> —————————————————————————————————————————————————————— </div>
+    </div>
+    <div class="pure-menu pure-menu-horizontal">
+      <!-- <form class="pure-form"> -->
+      <a class="pure-menu-heading pure-menu-link pure-menu-selected"
+        @click="getGamesIDRLByState(filterState,0,10)">🔄Games:</a>
+      <!-- state,start,limit -->
+      <ul class="pure-menu-list">
+        <label>JoinFee</label>
+        <input type="text" placeholder="joinFee (ether)" v-model='joinFee'>
+        <label>waitBlocks</label>
+        <input type="text" placeholder="waitBlocks" v-model='waitBlocks'>
+        <button class="button-success pure-button" @click="CreateAndJoinGame()">CreateAndJoinTheGame</button>
+        <!-- <li class="pure-menu-item"><a class="pure-menu-link"></a></li> -->
+      </ul>
+      <!-- </form> -->
+    </div>
+    <div class="pure-g">
+      <div class="pure-u-1 pure-u-md-1-1"> —————————————————————————————————————————————————————— </div>
+    </div>
+    <div>
+      Games lobby:
+      <button :class="[lobbyFilterState == 0 ? 'pure-button-active':'',cssList[0],'pure-button']"
+        @click="(lobbyFilterState = 0) & (getGamesIDRLByState(lobbyFilterState,0,10))">Joining</button>
+
+      <button :class="[lobbyFilterState == 4 ? 'pure-button-active':'',cssList[4],'pure-button']"
+        @click="(lobbyFilterState = 4) & (getGamesIDRLByState(lobbyFilterState,0,10))">Finished</button>
+
+
+    </div>
+
+    <!-- lobby -->
+    <div style="width: auto;">
+      <button v-for='gameData in lobbyGameDatas' :class="[cssList[lobbyFilterState],'pure-button']"
+        @click="gameInteraction(gameData.GameId,gameData.joinFee,gameData.state,gameData.myUintInTheGame)"
+        style="margin:5px;width: 500px;">
+        <div class="pure-g">
+          <!-- <div class="pure-u-1-1">
+            <p>Creater&Joined:{{gameData.GameId}}</p>
+          </div> -->
+          <div class="pure-u-1-2">
+            <p>GameID:{{gameData.GameId}}</p>
+          </div>
+          <div class="pure-u-1-2">
+            <p>I in Game:{{gameData.myUintInTheGame}}</p>
+          </div>
+          <div class="pure-u-2-5">
+            <p>waitBlocks:{{gameData.waitBlocks}}</p>
+          </div>
+          <div class="pure-u-3-5">
+            <p>expire@:{{gameData.expireBlock}} blocks</p>
+          </div>
+          <div class="pure-u-1-1">
+            <p>JoinFee:{{w3.utils.fromWei(gameData.joinFee, 'ether')}}</p>
+          </div>
+        </div>
+      </button>
+    </div>
+    <div class="pure-g">
+      <div class="pure-u-1 pure-u-md-1-1"> —————————————————————————————————————————————————————— </div>
+    </div>
+    <div class="pure-menu pure-menu-horizontal">
+      选择策略：
+      <ul class="pure-menu-list">
+        <li class="pure-menu-item" @click='strategy=1'><a href="#" class="pure-menu-link">🔺</a></li>
+        >
+        <li class="pure-menu-item" @click='strategy=2'><a href="#" class="pure-menu-link">🔹</a></li>
+        >
+        <li class="pure-menu-item" @click='strategy=3'><a href="#" class="pure-menu-link">⚪</a></li>
+        > 🔺……
+
+      </ul>
+      | 加密用随机熵源:
+      <input type="text" placeholder="entropy" v-model='entropy'>
+    </div>
+    <div>
+      My Games:
+      <button :class="[MyFilterState == 1 ? 'pure-button-active':'',cssList[1],'pure-button']"
+        @click="(MyFilterState = 1) & (getMyGamesIDRLByState(MyFilterState,0,10))">WaitInitiative</button>
+      <button :class="[MyFilterState == 2 ? 'pure-button-active':'',cssList[2],'pure-button']"
+        @click="(MyFilterState = 2) & (getMyGamesIDRLByState(MyFilterState,0,10))">WaitGote</button>
+      <button :class="[MyFilterState == 3 ? 'pure-button-active':'',cssList[3],'pure-button']"
+        @click="(MyFilterState = 3) & (getMyGamesIDRLByState(MyFilterState,0,10))">WaitCombat</button>
+    </div>
+
+    <!-- My -->
+    <div style="width: auto;">
+      <button v-for='gameData in myGameDatas' :class="[cssList[MyFilterState],'pure-button']"
+        @click="gameInteraction(gameData.GameId,gameData.joinFee,gameData.state,gameData.myUintInTheGame)"
+        style="margin:5px;width:500px">
+        <div class="pure-g">
+          <!-- <div class="pure-u-1-1">
+            <p>Creater&Joined:{{gameData.GameId}}</p>
+          </div> -->
+          <div class="pure-u-1-2">
+            <p>GameID:{{gameData.GameId}}</p>
+          </div>
+          <div class="pure-u-1-2">
+            <p>I in Game:{{gameData.myUintInTheGame}}</p>
+          </div>
+          <div class="pure-u-2-5">
+            <p>waitBlocks:{{gameData.waitBlocks}}</p>
+          </div>
+          <div class="pure-u-3-5">
+            <p>expire@:{{gameData.expireBlock}} blocks</p>
+          </div>
+          <div class="pure-u-1-1">
+            <p>JoinFee:{{w3.utils.fromWei(gameData.joinFee, 'ether')}}</p>
+          </div>
+
+        </div>
+      </button>
+    </div>
+
+
+    <!-- {{ message }} -->
+  </div>
+
+
+  <script>
+    var NAPTokenAddress = "0x6E77B74a7bbC4082264948b5f89cd8821Cf4DcA0";
+    var MVPAddress = "0xCF923640f4fA66E67434B99532dF60282093a717";
+    self.setTimeout("app.RefreshFunds()", 1000);
+    self.setInterval("app.RefreshFunds()", 10000);
+    
+    
+    web3js = new Web3(web3.currentProvider);
+    NAPTokens = new web3js.eth.Contract(NAPTokenABI, NAPTokenAddress);
+    MVP = new web3js.eth.Contract(MVP_0_ABI, MVPAddress);
+    
+    ethereum.enable();
+    window.ethereum; 
+    web3js.eth.getAccounts().then(function (accounts) {
+      
+      console.log(accounts);
+    });
+    ethereum.on('accountsChanged', function (accounts) {
+      
+      app.RefreshFunds();
+      app.myGameDatas = [];
+      app.lobbyGameDatas = [];
+    })
+    var STORAGE_KEY = 'Nash Protocol-MVP_0';
+    var NAPStorage = {
+      fetch: function () {
+        
+        var games = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        
+        
+        
+        
+        
+        return games
+      },
+      save: function (games) {
+        
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(games))
+      }
+    };
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        
+        w3: web3js = new Web3(web3.currentProvider),
+        blockHeight: 0,
+        addressNow: '0x0000000000000000000000000000000000000000',
+        walletBalance: 0,
+        walletBalanceF: '',
+        mvp0Balance: 0,
+        mvp0BalanceF: '',
+        v_Naps: 0,
+        MVP_Naps: 0,
+        MVP_NapsF: 0,
+        
+        joinFee: '0.1',
+        waitBlocks: '100',
+        lobbyFilterState: 0,
+        MyFilterState: 0,
+        lobbyGameDatas: [],
+        myGameDatas: [],
+        cssList: ['button-success', 'button-error', 'button-warning', 'button-secondary', ''],
+        strategy: 0,
+        entropy: 'The external input that can be obtained from a Web browser as a random signal entropy value.',
+        encryptedEntropy: '',
+        localGames: NAPStorage.fetch(),
+        finallyRst:''
+
+      },
+      
+      
+
+      
+      methods: {
+        
+        
+        CreateAndJoinGame() {
+          MVP.methods.createGameAndJoin(this.waitBlocks).send({
+            from: web3.eth.defaultAccount,
+            value: web3js.utils.toWei(this.joinFee)
+          }).then((rst) => {
+            console.log('rst', rst);
+            this.RefreshFunds();
+          });
+        },
+        getGamesIDRLByState(_state, _startID, _limit) {
+          MVP.methods.getGamesIDRLByState(_state, _startID, _limit).call({ from: web3.eth.defaultAccount }).then((GameIDRLs) => {
+            if (_state == 0 | _state == 4) {
+              this.lobbyGameDatas = [];
+            }
+            else {
+              this.myGameDatas = [];
+            }
+            
+            
+            for (let i = 0; GameIDRLs[0][i] != 0 | i == 0; i++) {
+              
+              MVP.methods.Games(GameIDRLs[0][i]).call().then((rst2) => {
+                
+                if (_state == rst2.state) {
+                  rst2.GameId = GameIDRLs[0][i];
+                  rst2.myUintInTheGame = GameIDRLs[1][i];
+                  if (_state == 0 | _state == 4) {
+                    this.lobbyGameDatas.push(rst2);
+                  }
+                  else {
+                    this.myGameDatas.push(rst2);
+                  }
+                }
+
+              })
+
+            }
+            console.log('lobbyGameDatas', this.lobbyGameDatas);
+          });
+        },
+        getMyGamesIDRLByState(_state, _startID, _limit) {
+          MVP.methods.getMyGamesIDRLByState(_state, _startID, _limit).call({ from: web3.eth.defaultAccount }).then((GameIDRLs) => {
+            console.log('getMyGamesIDRLByState', GameIDRLs);
+            if (_state == 0 | _state == 4) {
+              this.lobbyGameDatas = [];
+            }
+            else {
+              this.myGameDatas = [];
+            }
+            
+            
+            for (let i = 0; GameIDRLs[0][i] != 0 | i == 0; i++) {
+              
+              MVP.methods.Games(GameIDRLs[0][i]).call().then((rst2) => {
+                
+                if (_state == rst2.state) {
+                  rst2.GameId = GameIDRLs[0][i];
+                  rst2.myUintInTheGame = GameIDRLs[1][i];
+                  if (_state == 0 | _state == 4) {
+                    this.lobbyGameDatas.push(rst2);
+                  }
+                  else {
+                    this.myGameDatas.push(rst2);
+                  }
+                }
+
+              })
+
+            }
+            
+          });
+        },
+        gameInteraction(_gameID, _joinFee, _gameState, _myUintInGame) {
+          
+          switch (parseInt(_gameState)) {
+            case 0: 
+              
+              if (_myUintInGame == 255) {
+                alert('你是该游戏的创建者，别闹。智能合约也做了限制不能255状态的重复加入，因为属于已经加入。')
+                break;
+              }
+              else if (_myUintInGame == 0) {
+                console.log(_gameState);
+                MVP.methods.joinGame(_gameID).send({ from: web3.eth.defaultAccount, value: _joinFee });
+                MVP.getPastEvents('GameStateUpdated', { filter: { Player: web3.eth.defaultAccount }, fromBlock: 0 }).then((rst) => { console.log(rst) });
+                break;
+              }
+
+
+            case 1: 
+              
+              
+              
+              if (this.strategy == 0) {
+                alert('请先选择策略')
+                break;
+              }
+              if (this.entropy == '') {
+                alert('请输入随机加密熵')
+                break;
+              }
+              cfm = confirm(`您的策略：${this.strategy},加密熵原文：${this.entropy}。请问是否要提交呢？（此处只供demo展示，正式版不会出现,并且将使用鼠标和3D复杂场景生成长度不小于64的ASCII字符范围的熵原文。）`)
+              if (cfm == false) break;
+              let encryptedEntropy = web3js.utils.keccak256(this.entropy).substring(2);
+              let strategy = this.strategy;
+              let hash = this.encryption(encryptedEntropy, strategy);
+              console.log(hash);
+              MVP.methods.setInitiativeAction(_gameID, hash).send({ from: web3.eth.defaultAccount }).then((rst) => {
+                this.localGames[_gameID] = { encryptedEntropy, strategy }
+                NAPStorage.save(this.localGames);
+                console.log(rst);
+                alert('先手策略Hash提交成功：', hash);
+              });
+              this.strategy = 0;
+              
+              break;
+            case 2: 
+              
+              _myUintInGame == 201 ? alert('您已经是先手了，并提交了hash，等待对方发出策略吧') : 
+                (this.strategy == 0 ? alert('请先选择策略') :
+                  MVP.methods.setGoteAction(_gameID, this.strategy).send({ from: web3.eth.defaultAccount }).then((rst) => {
+                    console.log(rst);
+                    alert('后手策略明文提交成功');
+                  })
+                );
+              break;
+            case 3: 
+              
+              if (_myUintInGame == 201) {
+                let gls = this.localGames[_gameID];
+                
+                
+                
+                
+
+                MVP.getPastEvents('GameStateUpdated', { filter: { GameID: _gameID }, fromBlock: 0 }).then((rst) => {
+                  this.opponent = rst.pop().returnValues.Player;
+                  
+                  console.log(_gameID,typeof(gls.encryptedEntropy),gls.encryptedEntropy,typeof(gls.strategy),gls.strategy,typeof(this.opponent),this.opponent)
+                  MVP.methods.makeCombat(_gameID, gls.encryptedEntropy, gls.strategy, this.opponent).send({ from: web3.eth.defaultAccount }).then((rst) => {
+                    console.log(rst);
+                    MVP.getPastEvents('GameOver', { filter: { GameID: 3, nowState: 3 }, fromBlock: 0 }).then((rst)=>{
+                      console.log(rst);
+                      this.finallyRst = rst
+                      console.log('游戏ID',this.finallyRst[0].returnValues.GameID)
+                      console.log('赢家',this.finallyRst[0].returnValues.Winner)
+                      console.log('奖金',this.finallyRst[0].returnValues.prize)
+                      
+                      alert(`GameID=${this.finallyRst[0].returnValues.GameID} | 赢家=${this.finallyRst[0].returnValues.Winner},
+                      奖金=${this.finallyRst[0].returnValues.prize} wei`);
+                    })
+                  });
+                });
+
+                
+              }
+              else alert(`您已经是该对局的后手，已经提交了明文策略=${_myUintInGame}，等待先手决胜吧!`);
+
+              break;
+            case 4: 
+              
+              alert('这是已经结束了的游戏，之后开放通过Events查询游戏对战双方记录。')
+              break;
+          }
+        },
+        encryption(enetp, stg) {
+          
+
+          
+          return web3js.utils.keccak256(web3js.eth.abi.encodeParameters(['string', 'uint32'], [enetp, stg]));
+        },
+        getEvents() {
+          
+          
+          
+          
+          
+          
+          //
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          MVP.getPastEvents('newGameCreated', { filter: { waitBlocks: [0, 100] }, fromBlock: 0 }).then((rst) => { console.log(rst) });
+          NAPTokens.getPastEvents('Transfer', { filter: { from: web3.eth.defaultAccount }, fromBlock: 0 }).then((rst) => { console.log(rst) });
+
+        },
+
+        
+        RefreshFunds() {
+          this.getWalletBalance();
+          this.getMyMvp0Balance();
+          this.getMvp0Balance();
+          web3js.eth.getBlockNumber().then((rst) => { this.blockHeight = rst })
+          this.addressNow = web3.eth.defaultAccount;
+        },
+        getWalletBalance() {
+          NAPTokens.methods.balanceOf(web3.eth.defaultAccount).call().then((result) => {
+            this.walletBalance = web3js.utils.fromWei(result, 'ether');
+            this.walletBalanceF = parseFloat(this.walletBalance).toLocaleString();
+          });
+        },
+        getMyMvp0Balance() {
+          MVP.methods.NAPsInBankBalanceOf(web3.eth.defaultAccount).call().then((result) => {
+            this.mvp0Balance = web3js.utils.fromWei(result, 'ether');
+            this.mvp0BalanceF = parseFloat(this.mvp0Balance).toLocaleString();
+          });
+        },
+        getMvp0Balance() {
+          NAPTokens.methods.balanceOf(MVPAddress).call().then((rst) => {
+            this.MVP_Naps = web3js.utils.fromWei(rst, 'ether');
+            this.MVP_NapsF = parseFloat(this.MVP_Naps).toLocaleString();
+          })
+        },
+        numToLocaleString(_num) {
+          return num.toLocaleString();
+        },
+        depositToMvp() {
+          NAPTokens.methods.transfer(MVPAddress, web3.toWei(this.v_Naps, "ether")).send({ from: web3.eth.defaultAccount }).then(() => {
+            this.RefreshFunds();
+          });
+
+        },
+        withdrawFromMvp() {
+          MVP.methods.withdrawNAP(web3.toWei(this.v_Naps, "ether")).send({ from: web3.eth.defaultAccount }).then(() => {
+            this.RefreshFunds();
+          });
+        },
+        
+        
+        
+        transfer() {
+          NAPTokens.methods.transfer("0x54a6ca501D8E867cA21509f1CFf49Ff739B6137e", web3.toWei("1234343", "ether")).send({ from: web3.eth.defaultAccount });
+        },
+        
+        
+        
+      }
+    })
+    
+
+
+  </script>
+
+</body>
+
+</html>
+
+
+<!-- {% endverbatim myblock %} -->
