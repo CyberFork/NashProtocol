@@ -381,15 +381,17 @@
                                                     type="number" placeholder='waitBlocks (default is 100)' step='10'
                                                     v-model='oracle_create_waitblocks'></input>
                                                 <input class="input-group-text" style="width: 100%;margin-bottom: 5px;"
-                                                    type="number" placeholder='$ETH JoinFee' step='0.1'
-                                                    v-model='oracle_create_joinfee'></input>
+                                                    type="number" :placeholder="'$' + coinName[netWork] + ' JoinFees'"
+                                                    step='0.1' v-model='oracle_create_joinfee'></input>
                                                 <input class="input-group-text" style="width: 100%;margin-bottom: 5px;"
                                                     type="number" placeholder='$NAP Bid(default is 0)'
                                                     v-model='oracle_create_bidFee'></input>
                                                 <small v-if="(oracle_create_joinfee !='')&(oracle_create_bidFee !='')"
                                                     style="white-space: pre-line;text-align: center;display: block;">
-                                                    【{{oracle_create_bidFee/(oracle_create_joinfee*0.95)}} $NAP/$ETH】
-                                                    【{{(oracle_create_joinfee*0.95)/oracle_create_bidFee}} $ETH/$NAP】
+                                                    【{{oracle_create_bidFee/(oracle_create_joinfee*0.95)}}
+                                                    $NAP/${{coinName[netWork]}}】
+                                                    【{{(oracle_create_joinfee*0.95)/oracle_create_bidFee}}
+                                                    ${{coinName[netWork]}}/$NAP】
                                                 </small>
 
                                             </div>
@@ -474,7 +476,7 @@
                                         class="btn btn-success" @click='getReOvLogs'>
                                         Recently Over
                                     </button>
-<!-- 
+                                    <!-- 
                                     <hr>
                                     <h5 class="card-title">LocalStorage</h5>
                                     <button style="width: 100%;margin-bottom: 5px;" type="button" disabled
@@ -559,8 +561,10 @@
                                                     v-model='oracle_joing_bidFee'></input>
                                                 <small v-if="(oracle_join_joinfee !='')&(oracle_joing_bidFee !='')"
                                                     style="white-space: pre-line;text-align: center;display: block;">
-                                                    【{{oracle_joing_bidFee/(oracle_join_joinfee*0.95)}} $NAP/$ETH】
-                                                    【{{(oracle_join_joinfee*0.95)/oracle_joing_bidFee}} $ETH/$NAP】
+                                                    【{{oracle_joing_bidFee/(oracle_join_joinfee*0.95)}}
+                                                    $NAP/${{coinName[netWork]}}】
+                                                    【{{(oracle_join_joinfee*0.95)/oracle_joing_bidFee}}
+                                                    ${{coinName[netWork]}}/$NAP】
                                                 </small>
 
                                             </div>
@@ -670,7 +674,8 @@
                                 </span>
                                 <span v-if="logsType == 4">
                                     <div v-for="olog in OracleLogs" class="alert alert-success" role="alert">
-                                        【#{{olog.returnValues.OracleID}}】oracle created by 【{{olog.returnValues.Creater}}】at blockNumber:{{olog.blockNumber}}
+                                        【#{{olog.returnValues.OracleID}}】oracle created by
+                                        【{{olog.returnValues.Creater}}】at blockNumber:{{olog.blockNumber}}
                                         【JoinFee:{{w3.utils.fromWei(String(olog.returnValues.JoinFee),'ether')}}$ETH】.
                                         【WatiBlock:{{olog.returnValues.WaitBlocks}}】.【Encrypted Strategy :
                                         {{olog.returnValues.stgHash}}】
@@ -770,7 +775,8 @@
                                 </div>
                             </div>
                             <button type="button" class="btn btn-secondary" @click='claimAllETH()' title="To wallet."
-                                style="width: 100%;">unClaim $ETH: {{ethUnclaimF}} Click to ClaimALL</button>
+                                style="width: 100%;">unClaim ${{coinName[netWork]}}: {{ethUnclaimF}} Click to
+                                ClaimALL</button>
                         </div>
                     </div>
                 </div>
@@ -779,13 +785,16 @@
 
 
         <div class="modal fade" id="staticBackdropPending" data-backdrop="static" data-keyboard="false" tabindex="-1"
-            role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true" style=";">
+            role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true" style="position: fixed;top:30%">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">
+                        <h5 v-if="isCreating" class="modal-title" id="staticBackdropLabel">
                             Do not refuse! If you sent the transaction.
                         </h5>
+                        <button v-if="!isCreating" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body" style="text-align: center;">
 
@@ -816,7 +825,7 @@
         </div>
 
         <div class="modal fade " id="staticBackdropAnnealed" data-backdrop="static" data-keyboard="false" tabindex="-1"
-            role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true" style=";">
+            role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true" style="position: fixed;top:30%">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -904,7 +913,7 @@
                 initContractInstance()
                 break;
             case 1337://tf
-                NAPAddress = "0x9FA1E566BBf36A45EA07a12580FBA09940665bd1";
+                NAPAddress = "0x39455E9271357179d92098f35895C4F0aF2D7602";
                 app.netWork = 'Truffle'
                 initContractInstance()
                 break;
@@ -1005,7 +1014,6 @@
             return {
                 NAPAddress: NAPAddress,
                 w3: web3js = new Web3(window.ethereum),
-
                 addressNow: '0x0000000000000000000000000000000000000000',
                 LSCache: '',//LocalData_Cache.fetch(),
                 LSSent: '',//LocalData_Sent.fetch(),
@@ -1020,7 +1028,7 @@
                 cfBtnNumber: 99,
                 oracleMenu: true,
                 netWork: '',
-                coinName: { 'Kovan': 'ETH', 'BSC': 'BNB' },
+                coinName: { 'Ethereum': 'ETH', 'Truffle': 'ETH', 'xDAI': 'ETH', 'Kovan': 'ETH', 'BSC': 'BNB' },
                 blockExplorer: { 'Kovan': 'kovan.etherscan.io', 'BSC': 'bscscan.com' },
                 //个人数据
                 oracle_myStrategy: 0,
@@ -1040,6 +1048,7 @@
                 toastContent: 'Welcome to NASH protocol. This page is the interface of #0 MVP Contract which is the first contract of NASH——100 plan. \
                 This toast will been used to show notification when get feedback from blockChain and will auto close in 5 mins.',
                 //Oracle数据
+                isCreating: false,
                 oracle_filter_joinfee: '',
                 oracle_filter_waitblocks: '',
                 oracle_filter_IdStart: LocalData.fetch()[0] == undefined ? 1 : LocalData.fetch()[0],// LocalData.fetch(),
@@ -1234,8 +1243,8 @@
                 this.TotalSupply = this._formatBigNumber(rst);
             },
             async getBlockNumber() {
-                web3js.eth.getBlockNumber().then((rst) => { 
-                    this.BlockNumber = rst; 
+                web3js.eth.getBlockNumber().then((rst) => {
+                    this.BlockNumber = rst;
                     // console.log(rst) 
                 })
             },
@@ -1276,7 +1285,7 @@
 
                 cfm = confirm(`
                 waitBlock：    【${this.oracle_create_waitblocks}】
-                JoinFee：       【${this.oracle_create_joinfee}】 $ETH
+                JoinFee：       【${this.oracle_create_joinfee}】 $${this.coinName[this.netWork]}
                 BidFee:       【${this.oracle_create_bidFee}】 $NAP for 95% JoinFee
                 Strategy:     【${this.fingers[this.oracle_myStrategy]}】
                 EntropyRaw:   【${this.oracle_create_rawEntropy}】
@@ -1296,7 +1305,7 @@
                     this.updateAlertInOracleCreate(false, 'Pending: Create Oracle …… ……');
                     $('#staticBackdropPending').modal('show')
                     $('#staticBackdropCreateOracle').modal('hide')
-                    
+                    this.isCreating = true;
                     NAPContract.methods.createOracleAndSetHashStg(this.oracle_create_waitblocks, EncryptedStg).send({ from: this.addressNow, value: web3js.utils.toWei(String(this.oracle_create_joinfee)) }).then((rst) => {
                         console.log(rst);
                         this.dt = rst;
@@ -1315,6 +1324,7 @@
                         // https://kovan.etherscan.io/tx/0x05777487ef2bdcbfbcc828e2080e67c9f574edd89f81aa2a3705a1e6dc5c2b64
                         // rst.transactionHash
                         //TODO 再通过toast显示直达查询链接
+                        this.isCreating = false;
                         $('#staticBackdropPending').modal('hide')
 
                     })
@@ -1339,7 +1349,7 @@
                 this.oracle_joing_bidFee = ""
                 this.oracle_myStrategy = 0
                 this.updateAlertInOracleCreate(false, "Please select a strategy and full form.");
-                this.joiningOraclePrize = this.w3.utils.fromWei(String(parseFloat(oracleData.joinFee) * 1.9), "ether")
+                this.joiningOraclePrize = parseFloat(this.w3.utils.fromWei(String(oracleData.joinFee), "ether")) * 1.9
                 this.oracle_join_joinfee = this.w3.utils.fromWei(oracleData.joinFee, "ether")
                 this.joiningOracleID = oracleData.OracleID
                 this.joiningOracleCreateAt = oracleData.markBlock
@@ -1381,7 +1391,7 @@
             // anneal
             async annealButtonClick(oracleData) {
                 oid = oracleData.OracleID;
-                console.log('oid',oid)
+                console.log('oid', oid)
                 this.updateToastAndShow('Anneal Oracle', `Getting: Oracle【#${oid}】 Opponent  …… ……`);
                 let _opponent = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: { OracleID: oid }, fromBlock: 0 })).pop().returnValues.Player;
                 let ols = this.LSSent[oid]
@@ -1395,13 +1405,13 @@
                     // 需要去cache中寻找hash对应的oid
                     console.log(oid)
                     for (let i = 0; i < this.LSCache.length; i++) {
-                        console.log('for index:',i)
+                        console.log('for index:', i)
                         let _gotOid = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { stgHash: this.LSCache[i].EncryptedStg }, fromBlock: 23370920 }))[0].returnValues.OracleID;
-                        console.log('oid',oid)
+                        console.log('oid', oid)
                         if (_gotOid == undefined) {
-                            console.log('index:',i,'未找到原象',oid)
+                            console.log('index:', i, '未找到原象', oid)
                             continue
-                        } else if(_gotOid == oid) {
+                        } else if (_gotOid == oid) {
                             // 找到了缓存hash中对应的oid
                             let hsetp = this.LSCache[i].hsetp
                             let stg = this.LSCache[i].stg
@@ -1494,7 +1504,7 @@
                 })
             },
             async claimAllETH() {
-                this.updateToastAndShow('Claim $ETH', `Pending: Claim ${this.ethUnclaimF} $ETHs to wallet …… ……`);
+                this.updateToastAndShow(`Claim $${coinName[netWork]}`, `Pending: Claim ${this.ethUnclaimF} $ETHs to wallet …… ……`);
                 let rst = await NAPContract.methods.claim().send({ from: this.addressNow });
                 this.updateToastAndShow('Claim $ETHs', `Success: Claimed ${this.ethUnclaimF} $ETHs to wallet.`);
             },
