@@ -455,7 +455,7 @@
                                     </button>
                                     <hr>
                                     <h5 class="card-title">All Oracles:</h5>
-                                    *Last 10000 Blocks
+                                    <!-- *Last 10000 Blocks -->
                                     <button style="width: 100%;margin-bottom: 5px;" type="button"
                                         class="btn btn-success" @click='getReCrLogs'>
                                         Recently Created
@@ -757,8 +757,7 @@
                                 <div class="row" style="margin-bottom: 5px;">
                                     <div class="col-7">
                                         <a title="My $NAP-{{coinName[netWork]}} LPToken Locked Mining">{{lpTokenLockedF}}
-                                            $NAP-$BUSD
-                                            LPToken</a>
+                                            {{pairName[netWork]}} LPToken</a>
                                     </div>
                                     <div class="col-5" :title="'My Hoe in Pool proportion:' + myLPproportion+'%'">
                                         <span style="position: absolute;left: -0.4rem;top: -0.3rem;">⛏</span>
@@ -948,7 +947,7 @@
                 clearInterval(getNetworkInterval);
                 break;
         }
-        
+
     }
 
     var LS_NetWork;
@@ -978,6 +977,9 @@
         initUserData()
     })
 
+    function sleep(time) {
+        return new Promise((resolve) => setTimeout(resolve, time));
+    }
 
 
     // ----------------------- Local Storage
@@ -1059,6 +1061,8 @@
                 blockExplorer: { 'Kovan': 'kovan.etherscan.io', 'BSC': 'bscscan.com', 'BSCTest': 'testnet.bscscan.com' },
                 swapURL: { 'Kovan': 'https://app.uniswap.org/#/swap?outputCurrency=0x0D54464EC49818BDaf6f42f465025A06CbD68ffD', 'BSC': 'https://app.unisave.exchange/#/swap?inputCurrency=0x4d05de8d57b238457d62dadd6d3b395bbc8c9824&outputCurrency=0xe9e7cea3dedca5984780bafc599bd69add087d56' },
                 swapNAME: { 'Kovan': '$NAP-$ETH LPToken of Uniswap', 'BSC': '$NAP-$BUSD LPToken of Unisave' },
+                pairName: { 'Kovan': '$NAP-$ETH', 'BSC': '$NAP-$BUSD' },
+                NAPDBN: { 'Kovan': 23370920, 'BSC': 5094625 },
                 //个人数据
                 oracle_myStrategy: 0,
                 napsInWallet1e18: 0,
@@ -1222,46 +1226,67 @@
             // 个人数据 ---- end
             // 日志数据 ---- start
             async getMyCreateLogs() {
+                // $('#staticBackdropPending').modal('show')
                 this.OracleLogs = []
                 this.logsType = 1
-                this.dt = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { Creater: this.addressNow }, fromBlock: 0 })).reverse();
+                this.dt = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { Creater: this.addressNow }, fromBlock: this.NAPDBN[this.netWork] })).reverse();
                 this.OracleLogs = this.dt;
+                // $('#staticBackdropPending').modal('hide')
+                this.updateToastAndShow('My Oracle logs', `Fetched ${this.dt.length} My created logs.`);
             },
             async getMyJoinedLogs() {
+                // $('#staticBackdropPending').modal('show')
                 this.OracleLogs = []
                 this.logsType = 2
-                this.dt = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: { Player: this.addressNow }, fromBlock: 0 })).reverse();
+                this.dt = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: { Player: this.addressNow }, fromBlock: this.NAPDBN[this.netWork] })).reverse();
                 this.OracleLogs = this.dt;
+                // $('#staticBackdropPending').modal('hide')
+                this.updateToastAndShow('My Oracle logs', `Fetched ${this.dt.length} My joined logs.`);
             },
             async getMyWonLogs() {
+                // $('#staticBackdropPending').modal('show')
                 this.OracleLogs = []
                 this.logsType = 3
-                this.dt = (await NAPContract.getPastEvents('OracleOver', { filter: { Winner: this.addressNow }, fromBlock: 0 })).reverse();
+                this.dt = (await NAPContract.getPastEvents('OracleOver', { filter: { Winner: this.addressNow }, fromBlock: this.NAPDBN[this.netWork] })).reverse();
                 this.OracleLogs = this.dt;
+                // $('#staticBackdropPending').modal('hide')
+                this.updateToastAndShow('My Oracle logs', `Fetched ${this.dt.length} My won logs.`);
             },
             async getReCrLogs() {
+                // $('#staticBackdropPending').modal('show')
                 this.OracleLogs = []
                 this.logsType = 4
-                this.dt = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: {}, fromBlock: 0 })).reverse();
+                this.dt = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: {}, fromBlock: this.NAPDBN[this.netWork] })).reverse();
                 this.OracleLogs = this.dt;
+                // $('#staticBackdropPending').modal('hide')
+                this.updateToastAndShow('All Oracle logs', `Fetched ${this.dt.length} Recently created logs.`);
             },
             async getReJnLogs() {
+                // $('#staticBackdropPending').modal('show')
                 this.OracleLogs = []
                 this.logsType = 5
-                this.dt = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: {}, fromBlock: 0 })).reverse();
+                this.dt = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: {}, fromBlock: this.NAPDBN[this.netWork] })).reverse();
                 this.OracleLogs = this.dt;
+                // $('#staticBackdropPending').modal('hide')
+                this.updateToastAndShow('All Oracle logs', `Fetched ${this.dt.length} Recently Joined logs.`);
             },
             async getReOvLogs() {
+                // $('#staticBackdropPending').modal('show')
                 this.OracleLogs = []
                 this.logsType = 6
-                this.dt = (await NAPContract.getPastEvents('OracleOver', { filter: {}, fromBlock: 0 })).reverse();
+                this.dt = (await NAPContract.getPastEvents('OracleOver', { filter: {}, fromBlock: this.NAPDBN[this.netWork] })).reverse();
                 this.OracleLogs = this.dt;
+                // $('#staticBackdropPending').modal('hide')
+                this.updateToastAndShow('All Oracle logs', `Fetched ${this.dt.length} Recently over logs.`);
             },
             async getReCcd() {
+                // $('#staticBackdropPending').modal('show')
                 this.OracleLogs = []
                 this.logsType = 7
-                this.dt = (await NAPContract.getPastEvents('OracleCanceled', { filter: {}, fromBlock: 0 })).reverse();
+                this.dt = (await NAPContract.getPastEvents('OracleCanceled', { filter: {}, fromBlock: this.NAPDBN[this.netWork] })).reverse();
                 this.OracleLogs = this.dt;
+                // $('#staticBackdropPending').modal('hide')
+                this.updateToastAndShow('All Oracle logs', `Fetched ${this.dt.length} Recently canceled logs.`);
             },
             // 日志数据 ---- end
             // 宏观数据 ----- start
@@ -1423,7 +1448,7 @@
                 oid = oracleData.OracleID;
                 console.log('oid', oid)
                 this.updateToastAndShow('Anneal Oracle', `Getting: Oracle【#${oid}】 Opponent  …… ……`);
-                let _opponent = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: { OracleID: oid }, fromBlock: 0 })).pop().returnValues.Player;
+                let _opponent = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: { OracleID: oid }, fromBlock: this.NAPDBN[this.netWork] })).pop().returnValues.Player;
                 let ols = this.LSSent[oid]
                 console.log(_opponent)
                 console.log('ols', ols)
@@ -1498,7 +1523,7 @@
             async expiredButtonClick(oracleData) {
                 oid = oracleData.OracleID;
                 this.updateToastAndShow(`Finish expired Oracle`, `Getting: Oracle【#${oid}】 Opponent  …… ……`);
-                let _opponent = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { OracleID: oid }, fromBlock: 0 })).pop().returnValues.Creater;
+                let _opponent = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { OracleID: oid }, fromBlock: this.NAPDBN[this.netWork] })).pop().returnValues.Creater;
                 this.updateToastAndShow(`Finish expired Oracle`, `Pending: Finish expired Oracle【#${oid}】  …… ……`);
                 let rst = await NAPContract.methods.finishExpiredOracle(oid).send({ from: this.addressNow });
                 let evt = rst.events.OracleOver.returnValues;
