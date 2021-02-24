@@ -61,7 +61,7 @@
 </style>
 
 <body bgcolor="#E6E6FA">
-    <script src='./js/trianglify.bundle.js'></script>
+    <script src='https://unpkg.com/trianglify@^4/dist/trianglify.bundle.js'></script>
     <script>
         var pattern = trianglify({
             width: window.innerWidth,
@@ -589,10 +589,8 @@
                                     <div v-for="oracleData in OracleDatas" class="card"
                                         style="width: 18rem;float: left;">
                                         <div class="card-body">
-                                            <h5 class="card-title">OracleID : #{{oracleData.OracleID}}<a class="toCopy"
-                                                    style="cursor: pointer;"
-                                                    :data-clipboard-text="'My 【OracleID is #' + oracleData.OracleID + '】Let\'s have a showdown'">📑</a>
-                                            </h5>
+                                            <h5 class="card-title">OracleID : #{{oracleData.OracleID}}<a class="toCopy" style="cursor: pointer;"
+                                                :data-clipboard-text="'My 【OracleID is #' + oracleData.OracleID + '】Let\'s have a showdown'">📑</a></h5>
                                             <p class="card-text">
                                             <div class="container">
                                                 <div class="row">
@@ -848,29 +846,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        {{oracleOverContent}}
-                    </div>
-                    <div class="modal-footer">
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade " id="staticBackdropJoined" data-backdrop="static" data-keyboard="false" tabindex="-1"
-            role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true" style="position: fixed;top:30%">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">
-                            {{oracleJoinedTitle}}
-                        </h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        {{oracleJoinedContent}}
+                        {{oracleOverText}}
                     </div>
                     <div class="modal-footer">
 
@@ -987,15 +963,12 @@
         LS_NetWork = app.netWork;
         app.LSCache = LocalData_Cache.fetch();
         app.LSSent = LocalData_Sent.fetch();
-        app.LSWaitJoin = LocalData_WaitJoin.fetch();
-
         initUserData();
     }
     async function initUserData() {
         await app.RefreshAccount();
-        await app.intervalRefresh();
-        await app.getJoinAbleOracles();
-        await app.subscribeJoin(app.LSWaitJoin);
+        app.intervalRefresh();
+        app.getJoinAbleOracles();
     }
     // ------------------ ethereum on
     ethereum.autoRefreshOnNetworkChange = true;
@@ -1045,17 +1018,6 @@
             localStorage.setItem(LS_NetWork + "Sent", JSON.stringify(_oracles))
         }
     };
-    var LocalData_WaitJoin = {
-        fetch: function () {
-            //整个取
-            let _oracles = JSON.parse(localStorage.getItem(LS_NetWork + "Listening") || '[]');
-            return _oracles
-        },
-        save: function (_oracles) {
-            //整个存
-            localStorage.setItem(LS_NetWork + "Listening", JSON.stringify(_oracles))
-        }
-    };
     var myDate = new Date();
     // function getLocalTime(nS) {
     //     return new Date(parseInt(nS) * 1000).toLocaleString().replace(/:\d{1,2}$/, ' ');
@@ -1086,7 +1048,6 @@
                 addressNow: '0x0000000000000000000000000000000000000000',
                 LSCache: '',//LocalData_Cache.fetch(),
                 LSSent: '',//LocalData_Sent.fetch(),
-                LSWaitJoin: '',
                 LSD: LocalData.fetch(),
                 //宏观数据
                 TotalSupply: 0,
@@ -1117,7 +1078,6 @@
                 ethUnclaim1e18: 0,
                 ethUnclaimF: 0,
                 myLPproportion: 0,
-
                 //通知数据
                 toastTitle: 'NASH #0 MVP',
                 toastContent: 'Welcome to NASH protocol. This page is the interface of #0 MVP Contract which is the first contract of NASH——100 plan. \
@@ -1152,10 +1112,7 @@
                 oracle_overReason: { 0: 'AnnealInitWin', 1: 'AnnealGoteWin', 2: 'CriticalAnnealed', 3: 'AnnealExpiredOracle' },
                 /// oracle logs
                 logsType: 0,
-                /// dialogs
-                oracleOverContent: '',
-                oracleJoinedTitle: '',
-                oracleJoinedContent: '',
+                oracleOverText: '',
                 //test
                 dt: '',
 
@@ -1385,7 +1342,7 @@
                     this.updateAlertInOracleCreate(true, 'WaitBlocks should be in range [10,4900].');
                     return
                 }
-                this.updateAlertInOracleCreate(false, '✅Form fulled. Please check and confirm.');
+                this.updateAlertInOracleCreate(true, '✅Form fulled. Please check and confirm.');
                 cfm = confirm(`
                 waitBlock：    【${this.oracle_create_waitblocks}】
                 JoinFee：       【${this.oracle_create_joinfee}】 $${this.coinName[this.netWork]}
@@ -1410,9 +1367,9 @@
                     $('#staticBackdropCreateOracle').modal('hide')
                     this.isPending = true;
                     NAPContract.methods.createOracleAndSetHashStg(this.oracle_create_waitblocks, EncryptedStg).send({ from: this.addressNow, value: web3js.utils.toWei(String(this.oracle_create_joinfee)) }).then((rst) => {
-                        // console.log(rst);
+                        console.log(rst);
                         this.dt = rst;
-                        let oid = parseInt(rst.events.newOracleCreateAndHashStgSet.returnValues.OracleID);
+                        let oid = rst.events.newOracleCreateAndHashStgSet.returnValues.OracleID;
                         this.updateAlertInOracleCreate(false, `Success: 【#${oid}】Oracle Created, you can close this window now.`);
                         // 记录发出的加密策略的原象
                         this.LSSent[oid] = { hsetp, stg, bid };
@@ -1420,10 +1377,6 @@
                         // 删除防止刷新丢失捕捉的加密策略原象
                         this.LSCache.pop();
                         LocalData_Cache.save(this.LSCache);
-                        // 记录等待加入的监听Oid
-                        this.LSWaitJoin.push(parseInt(oid));
-                        LocalData_WaitJoin.save(this.LSWaitJoin);
-                        this.subscribeJoin(this.LSWaitJoin);
 
                         //获取创建后等待gote的列表展示：创建后→展示自己创建可以取消的
                         (this.cfBtnNumber = 1) & (oid - 9 < 0 ? this.oracle_filter_IdStart = 0 : this.oracle_filter_IdStart = oid - 9) & (this.MyState = 201) & (this.FilterState = 1) & (this.getMyOracleIDsRLByState(this.FilterState, this.MyState, this.oracle_filter_IdStart, this.LimitsReturn))
@@ -1441,18 +1394,12 @@
             },
             // cancel
             cancelButtonClick(oracleData) {
-                oid = parseInt(oracleData.OracleID);
+                oid = oracleData.OracleID;
                 this.updateToastAndShow(`Cancel Oracle`, `Pending: Oracle【#${oid}】 Cancel  …… ……`);
                 NAPContract.methods.cancelOracle(oid).send({ from: this.addressNow }).then((rst) => {
                     this.updateToastAndShow('Cancel Oracle', `Success:【#${oid}】Oracle Canceled.`);
                     this.getMyCreateWaitJoin();
-                    // 删除sent 策略释放空间
-                    delete this.LSSent[oid];
-                    LocalData_Sent.save(this.LSSent);
-                    // 删除监听
-                    this.deleteSubscribeJoin(oid);
                 })
-
             },
             // join
             joinButtonClick(oracleData) {
@@ -1466,8 +1413,7 @@
                 this.joiningOracleJoinFee = oracleData.joinFee
                 this.joiningOracleWaitBlock = oracleData.waitBlocks
             },
-            joinOracleAndSetGoteRawStg(ooid) {
-                let oid = parseInt(ooid)
+            joinOracleAndSetGoteRawStg(oid) {
                 if (this.oracle_myStrategy == 0) {
                     // alert('Please select strategy.');
                     // this.alertAtOracleCreate = 'Please select strategy.';
@@ -1501,7 +1447,7 @@
             },
             // anneal
             async annealButtonClick(oracleData) {
-                oid = parseInt(oracleData.OracleID);
+                oid = oracleData.OracleID;
                 console.log('oid', oid)
                 this.updateToastAndShow('Anneal Oracle', `Getting: Oracle【#${oid}】 Opponent  …… ……`);
                 // let _opponent = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: { OracleID: oid }, fromBlock: this.NAPDBN[this.netWork] })).pop().returnValues.Player;
@@ -1515,37 +1461,32 @@
                 if (ols == undefined) {
                     MissAgrs = true;// means missing
                     // 需要去cache中寻找hash对应的oid
-                    console.log('Start to fix missing Oracle hash preImage args',oid)
+                    console.log(oid)
                     for (let i = 0; i < this.LSCache.length; i++) {
-                        try {
-                            console.log('for index:', i)
-                            // let _gotOid = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { stgHash: this.LSCache[i].EncryptedStg }, fromBlock: this.NAPDBN[this.netWork] }))[0].returnValues.OracleID;
-                            let _gotOid = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { stgHash: this.LSCache[i].EncryptedStg }, fromBlock: this.BlockNumber - 4900 }))[0].returnValues.OracleID;
-                            console.log('oid', oid)
-                            if (_gotOid == undefined) {
-                                console.log('index:', i, '未找到原象', oid)
-                                continue
-                            } else if (parseInt(_gotOid) == oid) {
-                                // 找到了缓存hash中对应的oid
-                                let hsetp = this.LSCache[i].hsetp
-                                let stg = this.LSCache[i].stg
-                                let bid = this.LSCache[i].bid
-                                this.LSSent[oid] = { hsetp, stg, bid };
-                                LocalData_Sent.save(this.LSSent);
-                                ols = { hsetp, stg, bid };
-                                // MissAgrs = 2// means missing and found back
-                                MissAgrs = false;
-                                // cacheIndex = i;
-                                delete this.LSCache[i];
-                                LocalData_Cache.save(this.LSCache);
-                            }
-                        } catch (error) {
-                            console.log('Recover stg err:', error)
+                        console.log('for index:', i)
+                        // let _gotOid = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { stgHash: this.LSCache[i].EncryptedStg }, fromBlock: this.NAPDBN[this.netWork] }))[0].returnValues.OracleID;
+                        let _gotOid = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { stgHash: this.LSCache[i].EncryptedStg }, fromBlock: this.BlockNumber - 4900 }))[0].returnValues.OracleID;
+                        console.log('oid', oid)
+                        if (_gotOid == undefined) {
+                            console.log('index:', i, '未找到原象', oid)
+                            continue
+                        } else if (_gotOid == oid) {
+                            // 找到了缓存hash中对应的oid
+                            let hsetp = this.LSCache[i].hsetp
+                            let stg = this.LSCache[i].stg
+                            let bid = this.LSCache[i].bid
+                            this.LSSent[oid] = { hsetp, stg, bid };
+                            LocalData_Sent.save(this.LSSent);
+                            ols = { hsetp, stg, bid };
+                            // MissAgrs = 2// means missing and found back
+                            MissAgrs = false;
+                            // cacheIndex = i;
+                            delete this.LSCache[i];
+                            LocalData_Cache.save(this.LSCache);
                         }
-
                     }
                 }
-                // console.log(MissAgrs)
+                console.log(MissAgrs)
                 if (MissAgrs) {
                     this.updateToastAndShow(`Anneal Oracle【#${oid}】`, `Encryption parameter missing`);
                     return;
@@ -1554,20 +1495,16 @@
                 this.updateToastAndShow(`Anneal Oracle【#${oid}】`, `Pending: Anneal Oracle …… ……`);
                 this.isPending = true;
                 $('#staticBackdropPending').modal('show')
-                // console.log(oid, ols.hsetp, ols.stg, ols.bid)
+                console.log(oid, ols.hsetp, ols.stg, ols.bid)
                 let rst = await NAPContract.methods.makeAnneal(oid, ols.hsetp, ols.stg, ols.bid, _opponent).send({ from: this.addressNow });
-                this.dt = rst;
-                // 删除sent 策略释放空间
-                if (rst.events.OracleOver.type == "mined") {
+
+                if (rst != undefined) {
                     delete this.LSSent[oid];
                     LocalData_Sent.save(this.LSSent);
                 }
-                // 删除监听
-                this.deleteSubscribeJoin(oid)
-
                 $('#staticBackdropPending').modal('hide')
                 this.isPending = false;
-                this.oracleOverContent = '';
+                this.oracleOverText = '';
                 let evt = rst.events.OracleOver.returnValues;
                 this.dt = evt;
                 let _overTitle;
@@ -1582,13 +1519,13 @@
                 }
                 this.getMyCreateWaitAnneal()
 
-                this.oracleOverContent = _overTitle + _overText;
+                this.oracleOverText = _overTitle + _overText;
                 $('#staticBackdropAnnealed').modal('show')
 
             },
             // expired
             async expiredButtonClick(oracleData) {
-                oid = parseInt(oracleData.OracleID);
+                oid = oracleData.OracleID;
                 this.updateToastAndShow(`Finish expired Oracle`, `Getting: Oracle【#${oid}】 Opponent  …… ……`);
                 // let _opponent = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { OracleID: oid }, fromBlock: this.NAPDBN[this.netWork] })).pop().returnValues.Creater;
                 this.updateToastAndShow(`Finish expired Oracle`, `Pending: Finish expired Oracle【#${oid}】  …… ……`);
@@ -1703,58 +1640,14 @@
                     this.updateToastAndShow(`${this.filterButtonText[_state][_myState]}`, `Success: Oracle ID in range 【#${_startID}~#${Number(_startID) + Number(_limit) - 1}】——> Fetched ${this.filterButtonText[_state][_myState]} datas.`);
                 });
             },
-            // 订阅方法
-            subscribeCreate() {
-
-                // 这得吵死
-                NAPContract.events.newOracleCreateAndHashStgSet( { filter: { }, fromBlock: this.BlockNumber - 5000}, function (error, event) { console.log(event); })
-                    .on('data', function (event) {
-                        this.dt = event;
-                        console.log(event); // same results as the optional callback above
-                    })
-                    .on('changed', function (event) {
-                        // remove event from local database
-                    })
-                    .on('error', console.error)
-            },
-            subscribeJoin(_oids) {
-                NAPContract.events.GoteJoinedAndRawStgSet({ filter: { OracleID: _oids }, fromBlock: this.BlockNumber - 5000 }, function (error, event) {
-
-                    app.dt = event;
-                    // console.log('function', app.dt);
-                    app.oracleJoinedTitle = `#${event.returnValues.OracleID} been joined: 【${app.fingers[parseInt(event.returnValues.Strategy_Raw)]}】 & 【${app.w3.utils.fromWei(String(event.returnValues.GoteOracleBid), 'ether')} $NAP】`;
-                    app.oracleJoinedContent = `By 【${event.returnValues.Player}】.`
-                    $('#staticBackdropJoined').modal('show')
-                    // x.splice(x.indexOf(3),1)
-                })
-                    .on('data', function (event) {
-                        // console.log('.on(data',event); // same results as the optional callback above
-                    })
-                    .on('changed', function (event) {
-                        // remove event from local database
-                    })
-                    .on('error', console.error)
-            },
-            deleteSubscribeJoin(_oid) {
-                try {
-                    this.LSWaitJoin.splice(this.LSWaitJoin.indexOf(parseInt(_oid)), 1);
-                    LocalData_WaitJoin.save(this.LSWaitJoin);
-                } catch (error) {
-                    console.log('#', _oid, ': delete listen wait join error, may not listening', error)
-                }
-            },
             // test
-            // csent() {
-            //     this.LSSent = [];
-            //     LocalData_Sent.save(this.LSSent);
-            // },
-            // ccache() {
-            //     this.LSCache = [];
-            //     LocalData_Cache.save(this.LSCache);
-            // },
-            cWaitJoin() {
-                this.LSWaitJoin = [];
-                LocalData_WaitJoin.save(this.LSWaitJoin);
+            csent() {
+                this.LSSent = [];
+                LocalData_Sent.save(this.LSSent);
+            },
+            ccache() {
+                this.LSCache = [];
+                LocalData_Cache.save(this.LSCache);
             }
 
         }
