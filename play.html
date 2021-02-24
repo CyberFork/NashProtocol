@@ -1048,7 +1048,7 @@
     var LocalData_WaitJoin = {
         fetch: function () {
             //整个取
-            let _oracles = JSON.parse(localStorage.getItem(LS_NetWork + "Listening") || '[]');
+            let _oracles = JSON.parse(localStorage.getItem(LS_NetWork + "Listening") || '[0]');
             return _oracles
         },
         save: function (_oracles) {
@@ -1371,7 +1371,7 @@
                     this.oracle_create_bidFee = 0;
                 }
                 if (this.oracle_myStrategy == 0) {
-                    this.updateAlertInOracleCreate(true, 'Please select strategy.');
+                    this.updateAlertInOracleCreate(true, 'Please select strategy✌✊✋.');
                     return
                 }
                 else if (this.oracle_create_joinfee == '' || this.oracle_create_rawEntropy == '') {
@@ -1420,16 +1420,19 @@
                         // 删除防止刷新丢失捕捉的加密策略原象
                         this.LSCache.pop();
                         LocalData_Cache.save(this.LSCache);
-                        // 记录等待加入的监听Oid
-                        this.LSWaitJoin.push(parseInt(oid));
-                        LocalData_WaitJoin.save(this.LSWaitJoin);
-                        this.subscribeJoin(this.LSWaitJoin);
+
 
                         //获取创建后等待gote的列表展示：创建后→展示自己创建可以取消的
                         (this.cfBtnNumber = 1) & (oid - 9 < 0 ? this.oracle_filter_IdStart = 0 : this.oracle_filter_IdStart = oid - 9) & (this.MyState = 201) & (this.FilterState = 1) & (this.getMyOracleIDsRLByState(this.FilterState, this.MyState, this.oracle_filter_IdStart, this.LimitsReturn))
 
                         this.isPending = false;
                         $('#staticBackdropPending').modal('hide')
+
+                        sleep(1000)
+                        // 记录等待加入的监听Oid
+                        this.LSWaitJoin.push(parseInt(oid));
+                        LocalData_WaitJoin.save(this.LSWaitJoin);
+                        this.subscribeJoin(this.LSWaitJoin);
 
                     })
                 }
@@ -1471,7 +1474,7 @@
                 if (this.oracle_myStrategy == 0) {
                     // alert('Please select strategy.');
                     // this.alertAtOracleCreate = 'Please select strategy.';
-                    this.updateAlertInOracleCreate(true, 'Please select strategy.');
+                    this.updateAlertInOracleCreate(true, 'Please select strategy✌✊✋.');
                     return
                 }
                 else if (Number(this.oracle_joing_bidFee) > Number(this.napsInWallet1e18) / 1e18) {
@@ -1515,7 +1518,7 @@
                 if (ols == undefined) {
                     MissAgrs = true;// means missing
                     // 需要去cache中寻找hash对应的oid
-                    console.log('Start to fix missing Oracle hash preImage args',oid)
+                    console.log('Start to fix missing Oracle hash preImage args', oid)
                     for (let i = 0; i < this.LSCache.length; i++) {
                         try {
                             console.log('for index:', i)
@@ -1707,7 +1710,7 @@
             subscribeCreate() {
 
                 // 这得吵死
-                NAPContract.events.newOracleCreateAndHashStgSet( { filter: { }, fromBlock: this.BlockNumber - 5000}, function (error, event) { console.log(event); })
+                NAPContract.events.newOracleCreateAndHashStgSet({ filter: {}, fromBlock: this.BlockNumber - 5000 }, function (error, event) { console.log(event); })
                     .on('data', function (event) {
                         this.dt = event;
                         console.log(event); // same results as the optional callback above
@@ -1718,13 +1721,20 @@
                     .on('error', console.error)
             },
             subscribeJoin(_oids) {
-                NAPContract.events.GoteJoinedAndRawStgSet({ filter: { OracleID: _oids }, fromBlock: this.BlockNumber - 5000 }, function (error, event) {
+                // if(_oids.length == 0) _oids = [0];
+                console.log('_oids', _oids);
+                NAPContract.events.GoteJoinedAndRawStgSet({ filter: { OracleID: _oids }, fromBlock: this.BlockNumber - 4900 }, function (error, event) {
 
                     app.dt = event;
-                    // console.log('function', app.dt);
-                    app.oracleJoinedTitle = `#${event.returnValues.OracleID} been joined: 【${app.fingers[parseInt(event.returnValues.Strategy_Raw)]}】 & 【${app.w3.utils.fromWei(String(event.returnValues.GoteOracleBid), 'ether')} $NAP】`;
-                    app.oracleJoinedContent = `By 【${event.returnValues.Player}】.`
-                    $('#staticBackdropJoined').modal('show')
+
+                    try {
+                        app.oracleJoinedTitle = `#${event.returnValues.OracleID} been joined: 【${app.fingers[parseInt(event.returnValues.Strategy_Raw)]}】 & 【${app.w3.utils.fromWei(String(event.returnValues.GoteOracleBid), 'ether')} $NAP】`;
+                        app.oracleJoinedContent = `By 【${event.returnValues.Player}】.`
+                        $('#staticBackdropJoined').modal('show')
+                    } catch (error) {
+                        console.log(event, 'error', error);
+                    }
+
                     // x.splice(x.indexOf(3),1)
                 })
                     .on('data', function (event) {
