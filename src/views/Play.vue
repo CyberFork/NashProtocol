@@ -208,7 +208,8 @@
                         <span>随机数祈福</span>
                       </template>
                       <template slot="avatar">
-                        <a-icon type="control" style="font-size: 24px" spin />
+                        <icon-font class="avatarIcon" @click="cardMode = 2" type="icon-xueshimao" style="font-size: 24px;margin-right: 5px;"></icon-font>
+                        <a-icon class="avatarIcon" @click="cardMode = 3" type="control" style="font-size: 24px" :rotate="90" />
                       </template>
                     </a-card-meta>
                     <a-divider></a-divider>

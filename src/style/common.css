@@ -98,7 +98,7 @@ body {
   word-wrap: break-word;
 }
 
-.ant-divider,
+/* .ant-divider,
 .ant-divider-vertical {
   position: relative;
   top: -0.06em;
@@ -107,7 +107,7 @@ body {
   height: 0.9em;
   margin: 0 8px;
   vertical-align: middle;
-}
+} */
 
 .ant-input-affix-wrapper.ant-input:focus {
   border: none;
