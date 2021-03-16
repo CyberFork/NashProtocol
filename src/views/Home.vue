@@ -14,7 +14,7 @@
               {{ localize.header.ethwalletLock }}
             </span>
             <span v-else>
-              <a type="button" class="btn neon" style="background-color: rgba(0, 255, 115, 0.3)" @click="() => $router.push('/play')">
+              <a type="button" class="btn neon" style="background-color: rgba(0, 255, 115, 0.3)" @click="() => $router.push('/nash')">
                 {{ localize.header.ethwalletunLock }}
               </a>
               <br />

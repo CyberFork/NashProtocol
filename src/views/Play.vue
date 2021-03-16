@@ -1,23 +1,6 @@
 <template>
   <div id="play" style="width: 100%;">
     <!-- <star></star> -->
-    <!-- 网络连接信息 -->
-    <header>
-      <div class="card">
-        <div class="card-body">
-          <span>
-            <span style="float: left" class="neon" onclick="location.reload();"> <img src="../assets/nash.png" />N✌A✊S✋H - #0</span>
-          </span>
-          <span style="float: right;">
-            <a style="float: right;">Total Supply: {{ TotalSupply }} $NAP </a><br />
-            <a style="float: right;">BlockNumber: {{ BlockNumber }}</a
-            ><br />
-            <a :href="`https://${blockExplorer[netWork]}/address/` + NAPAddress" target="_blank">📡{{ netWork }}</a>
-            <a class="btn btn-danger btn-sm" target="_blank" style="float: right;" href="https://www.yuque.com/books/share/f2a34eb8-6ab2-418a-9a04-7a275af66a4c?#" role="button">Learn More🚀</a>
-          </span>
-        </div>
-      </div>
-    </header>
     <br />
     <!-- 游戏区域 -->
     <div v-if="NAPContract == undefined"></div>
@@ -1084,6 +1067,7 @@ export default {
     // 3 数据获取方法
     async RefreshAccount() {
       this.addressNow = (await this.ethereum.request({ method: "eth_accounts" }))[0];
+      this.$store.commit("SET_ADDRESS", this.addressNow);
     },
     // - 周期性刷新
     async intervalRefresh() {
@@ -1755,6 +1739,7 @@ export default {
       if (this.NAPContract == undefined) {
         this.networkId = parseInt(this.ethereum.chainId);
         this.switchNetwork(this.networkId);
+        this.$store.commit("SET_NETWORK", this.netWork);
       } else {
         this.intervalRefresh();
         // -- set cyclicity refresh for update info

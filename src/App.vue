@@ -5,15 +5,15 @@
 </template>
 
 <script>
-import trianglify from "trianglify";
+// import trianglify from "trianglify";
 
 export default {
   mounted() {
-    var pattern = trianglify({
-      width: window.innerWidth,
-      height: document.body.clientHeight,
-    });
-    document.body.appendChild(pattern.toCanvas());
+    // var pattern = trianglify({
+    //   width: window.innerWidth,
+    //   height: document.body.clientHeight,
+    // });
+    // document.body.appendChild(pattern.toCanvas());
   },
 };
 </script>
