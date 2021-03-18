@@ -1,5 +1,5 @@
 import { Icon } from "ant-design-vue";
 const IconFont = Icon.createFromIconfontCN({
-  scriptUrl: "//at.alicdn.com/t/font_2419486_7xzzesl37eo.js", // 在 iconfont.cn 上生成
+  scriptUrl: "//at.alicdn.com/t/font_2419486_jleslyfg53.js", // 在 iconfont.cn 上生成
 });
 export { IconFont };

@@ -16,7 +16,7 @@
                 <!-- 菜单tab -->
                 <a-tabs :activeKey="activeKey" @change="callback" class="strategy-tabs" animated>
                   <!-- 大厅 -->
-                  <a-tab-pane v-show="tabMode === 1" key="0" disabled>
+                  <a-tab-pane v-if="tabMode === 1" key="0" disabled>
                     <a-tag slot="tab" color="purple">
                       <a-icon type="reconciliation" style="font-size: 16px;vertical-align: -50%;" />
                       大厅 >>>
@@ -30,10 +30,10 @@
                         <a-card size="small" v-show="joiningOracleID !== oracleData.OracleID">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
-                              <span>#{{ oracleData.OracleID }}</span>
+                              <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
                             </template>
                             <template slot="avatar">
-                              <icon-font type="icon-goldcup" style="margin-right: 5px"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
+                              <icon-font type="icon-goldcup" class="log-icon"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
                             </template>
                           </a-card-meta>
                           <a-divider style="margin:12px 0"></a-divider>
@@ -50,30 +50,20 @@
                           </a-card-grid>
                           <a-card-grid>
                             <div class="strategy-tabs-icon"><a-icon type="loading" :style="{ transform: 'translate(-100%, -30%)' }" /></div>
-                            <span>等待加入</span>
+                            <span>等待加入...</span>
                           </a-card-grid>
                           <a-divider style="opacity:0"></a-divider>
                           <div class="strategy-tabs-div-left">
-                            <a-icon type="block" :style="{ 'font-size': '16px', 'margin-right': '5px' }" /><span>{{ oracleData.markBlock }}</span>
+                            <a-icon type="block" class="log-icon" /><span>{{ oracleData.markBlock }}</span>
                           </div>
                           <div class="strategy-tabs-div-right">
-                            <a-icon type="hourglass" :style="{ 'font-size': '16px', 'margin-right': '5px' }" /><span>{{ oracleData.waitBlocks }}</span>
+                            <a-icon type="hourglass" class="log-icon" /><span>{{ oracleData.waitBlocks }}</span>
                           </div>
                           <a-divider style="opacity:0"></a-divider>
                           <div style="margin-bottom: 1em">
-                            <a-button
-                              type="primary"
-                              @click="
-                                {
-                                  joiningOracleID = oracleData.OracleID;
-                                  oracle_join_joinfee = oracleData.joinFee;
-                                }
-                              "
-                              >加入对局</a-button
-                            >
+                            <a-button style="width: 70%;" type="primary" @click="handleJoinOracleCard(oracleData)">加入对局</a-button>
                           </div>
                         </a-card>
-
                         <!-- 可加入的卡片步骤二 -->
                         <a-card size="small" v-show="joiningOracleID === oracleData.OracleID">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
@@ -81,7 +71,7 @@
                               <a-icon type="arrow-left" @click="joiningOracleID = ''" />
                             </template>
                             <template slot="avatar">
-                              <icon-font type="icon-goldcup" style="margin-right: 5px"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
+                              <icon-font type="icon-goldcup" class="log-icon"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
                             </template>
                           </a-card-meta>
                           <a-divider style="margin:12px 0"></a-divider>
@@ -112,13 +102,13 @@
                             【{{ oracle_joing_bidFee / (oracle_join_joinfee * 0.95) }} $NAP/${{ coinName[netWork] }}】
                           </small>
                           <br />
-                          <div style="margin-bottom: 1em"><a-button type="primary" @click="joinOracleAndSetGoteRawStg(oracleData)">提交报价</a-button></div>
+                          <div style="margin-bottom: 1em"><a-button style="width: 70%;" type="primary" @click="joinOracleAndSetGoteRawStg(oracleData)">提交报价</a-button></div>
                         </a-card>
                       </a-list-item>
                     </a-list>
                   </a-tab-pane>
                   <!-- 我创建的 -->
-                  <a-tab-pane v-show="tabMode === 1" key="-1" disabled>
+                  <a-tab-pane v-if="tabMode === 1" key="-1" disabled>
                     <a-tag slot="tab" color="purple">
                       <a-icon type="reconciliation" style="font-size: 16px;vertical-align: -50%;" />
                       我创建的 >>>
@@ -127,21 +117,22 @@
                   <!-- 等待加入 -->
                   <a-tab-pane v-if="tabMode === 1" key="2" tab="等待加入" force-render>
                     <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '2'">
-                      <a-list-item slot="renderItem" slot-scope="item, index">
-                        <!-- 加入卡片 -->
-                        <a-card size="small" v-show="item.event === 'newOracleCreateAndHashStgSet'">
+                      <a-list-item slot="renderItem" slot-scope="oracleData, index">
+                        <!-- 等待加入卡片 -->
+                        <a-card size="small">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
-                              <span>#{{ item.returnValues.OracleID }}</span>
+                              <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
                             </template>
                             <template slot="avatar">
-                              <icon-font type="icon-goldcup" style="margin-right: 5px"></icon-font><span>{{ web3js.utils.fromWei(String(item.returnValues.JoinFee), "ether") }}${{ coinName[netWork] }}</span>
+                              <icon-font type="icon-goldcup" class="log-icon"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
                             </template>
                           </a-card-meta>
                           <a-divider style="margin:12px 0"></a-divider>
                           <a-card-grid>
                             <div>
-                              <div class="strategy-tabs-icon">
+                              <a-tag style="float:left;margin-top:1em;margin-left:-0.5em" color="pink">你</a-tag>
+                              <div class="strategy-tabs-icon-you">
                                 <a-icon type="check" :style="{ transform: 'translate(-100%, -30%)' }" />
                               </div>
                               <span>**** NAP</span>
@@ -152,66 +143,242 @@
                           </a-card-grid>
                           <a-card-grid>
                             <div class="strategy-tabs-icon"><a-icon type="loading" :style="{ transform: 'translate(-100%, -30%)' }" /></div>
-                            <span>等待加入</span>
+                            <span>等待加入...</span>
                           </a-card-grid>
                           <a-divider style="opacity:0"></a-divider>
                           <div class="strategy-tabs-div-left">
-                            <a-icon type="block" :style="{ 'font-size': '16px', 'margin-right': '5px' }" /><span>{{ item.blockNumber }}</span>
+                            <a-icon type="block" class="log-icon" /><span>{{ oracleData.markBlock }}</span>
                           </div>
                           <div class="strategy-tabs-div-right">
-                            <a-icon type="hourglass" :style="{ 'font-size': '16px', 'margin-right': '5px' }" /><span>{{ item.returnValues.WaitBlocks }}</span>
+                            <a-icon type="hourglass" class="log-icon" /><span>{{ oracleData.waitBlocks }}</span>
                           </div>
                           <a-divider style="opacity:0"></a-divider>
-                          <div style="margin-bottom: 1em"><a-button type="primary">加入对局</a-button></div>
+                          <div style="margin-bottom: 1em">
+                            <a-button style="width: 70%;" type="primary" @click="cancelButtonClick(oracleData)">取消</a-button>
+                          </div>
                         </a-card>
-                        <!-- 等待仲裁 -->
                       </a-list-item>
                     </a-list>
-                    <!-- 日志菜单 -->
-                    <!-- <span v-if="!oracleMenu">
-                      <h5 class="card-title">My Oracles:</h5>
-                      <button style="width: 100%;margin-bottom: 5px;" type="button" class="btn btn-success" @click="getMyCreateLogs">
-                        My Created
-                      </button>
-                      <button style="width: 100%;margin-bottom: 5px;" type="button" class="btn btn-success" @click="getMyJoinedLogs">
-                        My Joined
-                      </button>
-                      <button style="width: 100%;margin-bottom: 5px;" type="button" class="btn btn-success" @click="getMyWonLogs">
-                        My Won
-                      </button>
-                      <hr />
-                      <h5 class="card-title">All Oracles:</h5>
-                      <button style="width: 100%;margin-bottom: 5px;" type="button" class="btn btn-success" @click="getReCrLogs">
-                        Recently Created
-                      </button>
-                      <button style="width: 100%;margin-bottom: 5px;" type="button" class="btn btn-success" @click="getReJnLogs">
-                        Recently Joined
-                      </button>
-                      <button style="width: 100%;margin-bottom: 5px;" type="button" class="btn btn-success" @click="getReOvLogs">
-                        Recently Over
-                      </button>
-                      <button style="width: 100%;margin-bottom: 5px;" type="button" class="btn btn-success" @click="getReCcd">
-                        Recently Canceled
-                      </button>
-                    </span> -->
                   </a-tab-pane>
                   <!-- 等待仲裁 -->
-                  <a-tab-pane v-show="tabMode === 1" key="3" tab="等待仲裁">
+                  <a-tab-pane v-if="tabMode === 1" key="3" tab="等待仲裁">
                     <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '3'">
-                      <a-list-item slot="renderItem" slot-scope="item, index"> </a-list-item>
+                      <a-list-item slot="renderItem" slot-scope="oracleData, index">
+                        <!-- 等待仲裁卡片 -->
+                        <a-card size="small">
+                          <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
+                            <template slot="title">
+                              <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
+                            </template>
+                            <template slot="avatar">
+                              <icon-font type="icon-goldcup" class="log-icon"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
+                            </template>
+                          </a-card-meta>
+                          <a-divider style="margin:12px 0"></a-divider>
+                          <a-card-grid>
+                            <div>
+                              <a-tag style="float:left;margin-top:1em;margin-left:-0.5em" color="pink">你</a-tag>
+                              <div class="strategy-tabs-icon-you">
+                                <a-icon type="check" :style="{ transform: 'translate(-100%, -30%)' }" />
+                              </div>
+                              <span>**** NAP</span>
+                            </div>
+                            <div>
+                              <span>**** BNB/NAP</span>
+                            </div>
+                          </a-card-grid>
+                          <a-card-grid>
+                            <div>
+                              <div class="strategy-tabs-icon" style="width:26%">
+                                <div style="margin-left: -2.2em;">
+                                  <span style="font-size: 16px">
+                                    {{ fingers[oracleData.myUintInTheOracle] }}
+                                  </span>
+                                </div>
+                              </div>
+                              <span>**** NAP</span>
+                            </div>
+                            <div>
+                              <span>**** BNB/NAP</span>
+                            </div>
+                          </a-card-grid>
+                          <a-divider style="opacity:0"></a-divider>
+                          <div class="strategy-tabs-div-left">
+                            <a-icon type="block" class="log-icon" /><span>{{ oracleData.markBlock }}</span>
+                          </div>
+                          <div class="strategy-tabs-div-right">
+                            <a-icon type="hourglass" class="log-icon" /><span>{{ oracleData.waitBlocks }}</span>
+                          </div>
+                          <a-divider style="opacity:0"></a-divider>
+                          <div style="margin-bottom: 1em">
+                            <a-button style="width: 70%;" type="primary" @click="annealButtonClick(oracleData)">仲裁</a-button>
+                          </div>
+                        </a-card>
+                      </a-list-item>
                     </a-list>
                   </a-tab-pane>
                   <!-- 我加入的 -->
-                  <a-tab-pane v-show="tabMode === 1" key="-2" disabled>
+                  <a-tab-pane v-if="tabMode === 1" key="-2" disabled>
                     <a-tag slot="tab" color="purple">
                       <a-icon type="reconciliation" style="font-size: 16px;vertical-align: -50%;" />
                       我加入的 >>>
                     </a-tag>
                   </a-tab-pane>
                   <!-- 等待仲裁 -->
-                  <a-tab-pane v-show="tabMode === 1" key="4" tab="等待仲裁">
-                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs">
-                      <a-list-item slot="renderItem" slot-scope="item, index"> </a-list-item>
+                  <a-tab-pane v-if="tabMode === 1" key="4" tab="等待仲裁">
+                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '4'">
+                      <a-list-item slot="renderItem" slot-scope="oracleData, index">
+                        <!-- 等待仲裁结果卡片 -->
+                        <a-card size="small">
+                          <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
+                            <template slot="title">
+                              <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
+                            </template>
+                            <template slot="avatar">
+                              <icon-font type="icon-goldcup" class="log-icon"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
+                            </template>
+                          </a-card-meta>
+                          <a-divider style="margin:12px 0"></a-divider>
+                          <a-card-grid>
+                            <div>
+                              <div class="strategy-tabs-icon">
+                                <div>
+                                  <a-icon type="check" :style="{ transform: 'translate(-100%, -30%)' }" />
+                                </div>
+                              </div>
+                              <span>**** NAP</span>
+                            </div>
+                            <div>
+                              <span>**** BNB/NAP</span>
+                            </div>
+                          </a-card-grid>
+                          <a-card-grid>
+                            <div>
+                              <a-tag style="float:left;margin-top:1em;margin-left:-0.5em" color="pink">你</a-tag>
+                              <div class="strategy-tabs-icon-you" style="width: 25%;margin-left: -0.1em;">
+                                <div style="margin-left: -2.2em;">
+                                  <span style="font-size: 16px">
+                                    {{ fingers[oracleData.myUintInTheOracle] }}
+                                  </span>
+                                </div>
+                              </div>
+                              <span>**** NAP</span>
+                            </div>
+                            <div>
+                              <span>**** BNB/NAP</span>
+                            </div>
+                          </a-card-grid>
+                          <a-divider style="opacity:0"></a-divider>
+                          <div class="strategy-tabs-div-left">
+                            <a-icon type="block" class="log-icon" /><span>{{ oracleData.markBlock }}</span>
+                          </div>
+                          <div class="strategy-tabs-div-right">
+                            <a-icon type="hourglass" class="log-icon" /><span>{{ oracleData.waitBlocks }}</span>
+                          </div>
+                          <a-divider style="opacity:0"></a-divider>
+                          <div style="margin-bottom: 1em">
+                            <a-button style="width: 70%;color: rgba(0, 0, 0, 0.65);" disabled>等待仲裁<icon-font type="icon-shalou" :style="{ transform: 'translate(0, -20%)' }" spin></icon-font></a-button>
+                          </div>
+                        </a-card>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- *********************************切换菜单*********************************** -->
+                  <!-- 我的 -->
+                  <a-tab-pane v-if="tabMode === 2" key="-3" disabled>
+                    <a-tag slot="tab" color="purple">
+                      <a-icon type="reconciliation" style="font-size: 16px;vertical-align: -50%;" />
+                      我的 >>>
+                    </a-tag>
+                  </a-tab-pane>
+                  <!-- 我创建的日志 -->
+                  <a-tab-pane v-if="tabMode === 2" key="5" tab="我创建的">
+                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '5'">
+                      <a-list-item slot="renderItem" slot-scope="oracleLog, index">
+                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
+                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
+                          <!-- <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /> -->
+                        </a-list-item-meta>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- 我加入的日志 -->
+                  <a-tab-pane v-if="tabMode === 2" key="6" tab="我加入的">
+                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '6'">
+                      <a-list-item slot="renderItem" slot-scope="oracleLog, index">
+                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
+                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
+                          <!-- <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /> -->
+                        </a-list-item-meta>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- 我获胜的日志 -->
+                  <a-tab-pane v-if="tabMode === 2" key="7" tab="我获胜的">
+                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '7'">
+                      <a-list-item slot="renderItem" slot-scope="oracleLog, index">
+                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
+                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
+                          <!-- <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /> -->
+                        </a-list-item-meta>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- 全部 -->
+                  <a-tab-pane v-if="tabMode === 2" key="-4" disabled>
+                    <a-tag slot="tab" color="purple">
+                      <a-icon type="reconciliation" style="font-size: 16px;vertical-align: -50%;" />
+                      全部 >>>
+                    </a-tag>
+                  </a-tab-pane>
+                  <!-- 最近创建日志 -->
+                  <a-tab-pane v-if="tabMode === 2" key="8" tab="最近创建的">
+                    <a-list bordered style="text-align: left" item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '8'">
+                      <a-list-item slot="renderItem" slot-scope="oracleLog, index">
+                        <a-list-item-meta>
+                          <h3 slot="title">#{{ oracleLog.returnValues.OracleID }}</h3>
+                          <div slot="description">
+                            <p><a-icon type="user-add" class="log-icon" />Creator: {{ oracleLog.returnValues.Creater }}</p>
+                            <p><icon-font type="icon-bitcoin-encryption" class="log-icon" />JoinFee: {{ web3js.utils.fromWei(String(oracleLog.returnValues.JoinFee), "ether") }}${{ coinName[netWork] }}</p>
+                            <p><a-icon type="block" class="log-icon" />WaitBlocks: {{ oracleLog.returnValues.WaitBlocks }}</p>
+                            <p><a-icon type="bulb" class="log-icon" />strategyHash: {{ oracleLog.returnValues.stgHash }}</p>
+                          </div>
+                        </a-list-item-meta>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- 最近加入日志 -->
+                  <a-tab-pane v-if="tabMode === 2" key="9" tab="最近加入的">
+                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '9'">
+                      <a-list-item slot="renderItem" slot-scope="oracleLog, index">
+                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
+                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
+                          <!-- <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /> -->
+                        </a-list-item-meta>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- 最近结束日志 -->
+                  <a-tab-pane bordered style="text-align: left" v-if="tabMode === 2" key="10" tab="最近结束的">
+                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '10'">
+                      <a-list-item slot="renderItem" slot-scope="oracleLog, index">
+                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
+                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
+                        </a-list-item-meta>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- 最近取消日志 -->
+                  <a-tab-pane bordered style="text-align: left" v-if="tabMode === 2" key="11" tab="最近取消的">
+                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '11'">
+                      <a-list-item slot="renderItem" slot-scope="oracleLog, index">
+                        <a-list-item-meta>
+                          <h3 slot="title">#{{ oracleLog.returnValues.OracleID }}</h3>
+                          <div slot="description">
+                            <p><a-icon type="user-delete" class="log-icon" />Creator: {{ oracleLog.returnValues.CreaterAndCanceler }}</p>
+                          </div>
+                        </a-list-item-meta>
+                      </a-list-item>
                     </a-list>
                   </a-tab-pane>
                   <a-dropdown-button slot="tabBarExtraContent">
@@ -591,7 +758,7 @@
       </div>
     </a-modal>
     <!-- 创建提示卡片 -->
-    <a-modal v-model="confirmCreateOracle" title="确认创建信息" @ok="handleCreateOracle">
+    <a-modal :visible="confirmCreateOracle" title="确认创建信息" @ok="handleCreateOracle">
       <p>waitBlock： 【{{ oracle_create_waitblocks }}】</p>
       <p>JoinFee： 【{{ create_joinfee.number }}】 {{ coinName[netWork] }}</p>
       <p>BidFee: 【{{ create_bidFee.number }}】 $NAP for 95% JoinFee</p>
@@ -599,17 +766,16 @@
       <p>Strategy: 【{{ fingers[oracle_myStrategy] }}】</p>
     </a-modal>
     <!-- 加入提示卡片 -->
-    <a-modal v-model="confirmJoinOracle" title="确认加入信息" @ok="handleJoinOracle">
-      <p>waitBlock： 【{{ oracle_create_waitblocks }}】</p>
-      <p>JoinFee： 【{{ web3js.utils.fromWei(String(create_joinfee.number), "ether") }}】 {{ coinName[netWork] }}</p>
-      <p>BidFee: 【{{ create_bidFee.number }}】 $NAP for 95% JoinFee</p>
+    <a-modal :visible="confirmJoinOracle" title="确认加入信息" @ok="handleJoinOracle">
+      <p>waitBlock： 【{{ joiningOracleWaitBlock }}】</p>
+      <p>JoinFee： 【{{ web3js.utils.fromWei(String(oracle_join_joinfee), "ether") }}】 {{ coinName[netWork] }}</p>
+      <p>BidFee: 【{{ oracle_joing_bidFee }}】 $NAP for 95% JoinFee</p>
       <p>Strategy: 【{{ fingers[oracle_myStrategy] }}】</p>
     </a-modal>
   </div>
 </template>
 
 <script>
-// import star from "../components/Star.vue";
 import { notification, message } from "ant-design-vue";
 import Web3 from "web3";
 import { LocalData, LocalData_Cache, LocalData_Sent, LocalData_WaitJoin, myDate } from "../util/StorageUtils.js";
@@ -743,13 +909,6 @@ export default {
       LimitsReturn: 10,
       alertAtOracleCreate: "",
       showAlertAtOracleCreate: false,
-      joiningOracleID: "",
-      joiningOracleCreateAt: "",
-      joiningOracleJoinFee: "",
-      joiningOracleWaitBlock: "",
-      joiningOraclePrize: "",
-      oracle_joing_bidFee: "",
-      oracle_join_joinfee: "",
       oracle_overReason: {
         0: "AnnealInitWin",
         1: "AnnealGoteWin",
@@ -783,6 +942,7 @@ export default {
       staticBackdropJoinOracle: false,
       // create data new
       tokens: ["NAP", "Y3D", "SAVE", "MASK", "META", "BNB"],
+      // 创建数据
       create_joinfee: {
         unit: "BNB",
         number: 0,
@@ -792,6 +952,12 @@ export default {
         number: 0,
       },
       create_rawEntropy: "",
+      // 加入数据
+      joiningOracleID: "",
+      joiningOracleCreateAt: "",
+      joiningOracleWaitBlock: "",
+      oracle_joing_bidFee: "",
+      oracle_join_joinfee: "",
     };
   },
   watch: {
@@ -1183,7 +1349,6 @@ export default {
      *@Date: 2021-03-15 19:12:23
      */
     async getReCcd() {
-      // $('#staticBackdropPending').modal('show')
       this.OracleLogs = [];
       this.logsType = 7;
       this.dt = (
@@ -1193,7 +1358,7 @@ export default {
         })
       ).reverse();
       this.OracleLogs = this.dt;
-      // $('#staticBackdropPending').modal('hide')
+      console.log(this.dt);
       this.updateToastAndShow("All Oracle logs", `Fetched ${this.dt.length} Recently canceled logs.`);
     },
     // 日志数据 ---- end
@@ -1293,17 +1458,7 @@ export default {
     /*
       ? Deprecated
      */
-    joinButtonClick(oracleData) {
-      this.oracle_joing_bidFee = "";
-      this.oracle_myStrategy = 0;
-      this.updateAlertInOracleCreate(false, "Please select a strategy and full form.");
-      this.joiningOraclePrize = parseFloat(this.web3js.utils.fromWei(String(oracleData.joinFee), "ether")) * 1.9;
-      this.oracle_join_joinfee = this.web3js.utils.fromWei(oracleData.joinFee, "ether");
-      this.joiningOracleID = oracleData.OracleID;
-      this.joiningOracleCreateAt = oracleData.markBlock;
-      this.joiningOracleJoinFee = oracleData.joinFee;
-      this.joiningOracleWaitBlock = oracleData.waitBlocks;
-    },
+    joinButtonClick(oracleData) {},
     /*
      *@Author: yozora
      *@Description: 加入预言机
@@ -1322,21 +1477,22 @@ export default {
         this.oracle_joing_bidFee = 0;
       }
       // 更新通知信息
-      this.oracle_create_waitblocks = oracleData.waitBlocks;
-      this.create_joinfee.number = oracleData.joinFee;
-      this.create_bidFee.number = this.oracle_joing_bidFee;
+      this.joiningOracleWaitBlock = oracleData.waitBlocks;
 
       // 更新加入信息
       this.oracle_join_joinfee = this.web3js.utils.fromWei(oracleData.joinFee, "ether");
       this.joiningOracleID = oracleData.OracleID;
       this.confirmJoinOracle = true;
     },
-    // anneal
+    /*
+     *@Author: yozora
+     *@Description: 仲裁预言机
+     *@Date: 2021-03-18 18:33:00
+     */
     async annealButtonClick(oracleData) {
       let oid = parseInt(oracleData.OracleID);
       console.log("oid", oid);
       this.updateToastAndShow("Anneal Oracle", `Getting: Oracle【#${oid}】 Opponent  …… ……`);
-      // let _opponent = (await NAPContract.getPastEvents('GoteJoinedAndRawStgSet', { filter: { OracleID: oid }, fromBlock: this.NAPDBN[this.netWork] })).pop().returnValues.Player;
       let _opponent = (
         await this.NAPContract.getPastEvents("GoteJoinedAndRawStgSet", {
           filter: { OracleID: oid },
@@ -1344,8 +1500,6 @@ export default {
         })
       ).pop().returnValues.Player;
       let ols = this.LSSent[oid];
-      console.log(_opponent);
-      console.log("ols", ols);
       // 处理加密参数丢失：未提交成功就刷新的情况
       let MissAgrs; // means not missing
       // let cacheIndex;
@@ -1386,7 +1540,6 @@ export default {
           }
         }
       }
-      // console.log(MissAgrs)
       if (MissAgrs) {
         this.updateToastAndShow(`Anneal Oracle【#${oid}】`, `Encryption parameter missing`);
         return;
@@ -1395,9 +1548,6 @@ export default {
       this.updateToastAndShow(`Anneal Oracle【#${oid}】`, `Pending: Anneal Oracle …… ……`);
       this.isPending = true;
       this.staticBackdropPending = true;
-      // document.getElementById("#staticBackdropPending").modal("show");
-      // $('#staticBackdropPending').modal('show')
-      // console.log(oid, ols.hsetp, ols.stg, ols.bid)
       let rst = await this.NAPContract.methods.makeAnneal(oid, ols.hsetp, ols.stg, ols.bid, _opponent).send({ from: this.addressNow });
       this.dt = rst;
       // 删除sent 策略释放空间
@@ -1408,7 +1558,6 @@ export default {
       // 删除监听
       this.deleteSubscribeJoin(oid);
       this.staticBackdropPending = false;
-      // document.getElementById("#staticBackdropPending").modal("hide");
       this.isPending = false;
       this.oracleOverContent = "";
       let evt = rst.events.OracleOver.returnValues;
@@ -1427,10 +1576,8 @@ export default {
         }】.【OraclePrice:${parseFloat(String((2 * evt.ValidBid) / evt.Prize)).toLocaleString()}$NAP/$${this.coinName[this.netWork]}】.【OverReason:${this.oracle_overReason[evt.Reason]}】`;
       }
       this.getMyCreateWaitAnneal();
-
       this.oracleOverContent = _overTitle + _overText;
       this.staticBackdropAnnealed = true;
-      // document.getElementById("#staticBackdropAnnealed").modal("show");
     },
     // expired
     async expiredButtonClick(oracleData) {
@@ -1523,7 +1670,6 @@ export default {
                 rst2.OracleID = OracleIDRLs[0][i];
                 rst2.myUintInTheOracle = OracleIDRLs[1][i];
                 cacheOracleDatas.push(rst2);
-                cacheOracleDatas.forEach(item => console.log(item));
               });
           }
           this.updateToastAndShow(`${this.filterButtonText[1][0]}`, `Success: Oracle ID in range 【#${_startID}~#${Number(_startID) + Number(_limit) - 1}】——> Fetched ${this.filterButtonText[1][0]} datas.`);
@@ -1536,6 +1682,7 @@ export default {
       if (_startID == "") {
         _startID = 1;
       }
+      this.myLogs = [];
       this.OracleDatas = [];
       this.updateToastAndShow(`${this.filterButtonText[_state][_myState]} Refresh`, `Please wait, fetching ${this.filterButtonText[_state][_myState]} datas …… ……`);
       this.NAPContract.methods
@@ -1543,10 +1690,8 @@ export default {
         .call({ from: this.addressNow })
         .then(OracleIDRLs => {
           let cacheOracleDatas = [];
-
           if (_myState == 201) {
             //自己创建的（等待加入和等待退火的）
-            // console.log('xx')
             for (let i = 0; OracleIDRLs[0][i] != 0; i++) {
               if (OracleIDRLs[1][i] == 201) {
                 this.NAPContract.methods
@@ -1557,6 +1702,8 @@ export default {
                       rst2.OracleID = OracleIDRLs[0][i];
                       rst2.myUintInTheOracle = OracleIDRLs[1][i];
                       cacheOracleDatas.push(rst2);
+                      console.log("自己创建的（等待加入和等待退火的）");
+                      cacheOracleDatas.forEach(item => console.log(item));
                     }
                   });
               }
@@ -1576,14 +1723,15 @@ export default {
                       rst2.OracleID = OracleIDRLs[0][i];
                       rst2.myUintInTheOracle = OracleIDRLs[1][i];
                       cacheOracleDatas.push(rst2);
+                      console.log("别人创建自己加入");
+                      cacheOracleDatas.forEach(item => console.log(item));
                     }
                   });
               }
             }
           }
-
           this.OracleDatas = cacheOracleDatas;
-          // console.log(cacheOracleDatas.length)
+          this.myLogs = cacheOracleDatas;
           this.updateToastAndShow(
             `${this.filterButtonText[_state][_myState]}`,
             `Success: Oracle ID in range 【#${_startID}~#${Number(_startID) + Number(_limit) - 1}】——> Fetched ${this.filterButtonText[_state][_myState]} datas.`
@@ -1755,10 +1903,46 @@ export default {
         // 加载大厅-可加入的
         this.activeKey = "1";
         this.getJoinAbleOracles();
-      } else {
-        // 加载全部卡片
+      } else if (key === "2") {
+        // 加载我的-等待加入
         this.activeKey = "2";
-        this.getAllLogs();
+        this.getMyCreateWaitJoin();
+      } else if (key === "3") {
+        this.activeKey = "3";
+        // 加载我的-等待仲裁
+        this.getMyCreateWaitAnneal();
+      } else if (key === "4") {
+        this.activeKey = "4";
+        // 加载我的-等待仲裁结果
+        this.getMyJoinedWaitAnneal();
+      } else if (key === "5") {
+        this.activeKey = "5";
+        // 加载日志-我创建的
+        this.getMyCreateLogs();
+      } else if (key === "6") {
+        this.activeKey = "6";
+        // 加载日志-我加入的
+        this.getMyJoinedLogs();
+      } else if (key === "7") {
+        this.activeKey = "7";
+        // 加载日志-我获胜的
+        this.getMyWonLogs();
+      } else if (key === "8") {
+        this.activeKey = "8";
+        // 加载日志-最近创建
+        this.getReCrLogs();
+      } else if (key === "9") {
+        this.activeKey = "9";
+        // 加载日志-最近加入
+        this.getReJnLogs();
+      } else if (key === "10") {
+        this.activeKey = "10";
+        // 加载日志-最近结束
+        this.getReOvLogs();
+      } else if (key === "11") {
+        this.activeKey = "11";
+        // 加载日志-最近取消
+        this.getReCcd();
       }
     },
     /*
@@ -1792,7 +1976,20 @@ export default {
     closeAnnealed() {
       this.staticBackdropAnnealed = false;
     },
-    handleTabs() {},
+    /*
+     *@Author: yozora
+     *@Description: 切换tabs菜单
+     *@Date: 2021-03-18 22:25:06
+     */
+    handleTabs({ key }) {
+      if (key === "1") {
+        this.tabMode = 1;
+        this.activeKey = "1";
+      } else if (key === "2") {
+        this.tabMode = 2;
+        this.activeKey = "5";
+      }
+    },
     /*
      *@Author: yozora
      *@Description: 通知信息
@@ -1837,6 +2034,15 @@ export default {
         },
         key,
       });
+    },
+    /*
+     *@Author: yozora
+     *@Description: 加入预言机卡片翻转
+     *@Date: 2021-03-18 16:33:57
+     */
+    handleJoinOracleCard(oracleData) {
+      this.joiningOracleID = oracleData.OracleID;
+      this.oracle_join_joinfee = oracleData.joinFee;
     },
     /*
      *@Author: yozora
@@ -2047,7 +2253,7 @@ export default {
 } */
 
 .strategy-tabs >>> .ant-card-meta-avatar{
-    margin-right: 5em;
+    margin-right: 3.5em;
     margin-top: -1px;
 }
 
@@ -2056,6 +2262,13 @@ export default {
     background-color: rgba(242, 242, 242, 1);
     float: left;
     margin-left: 2em;
+    border-radius: 10px;
+}
+
+.strategy-tabs-icon-you{
+    padding: 1em 1em 1em 3em;
+    background-color: rgba(242, 242, 242, 1);
+    float: left;
     border-radius: 10px;
 }
 
@@ -2068,6 +2281,13 @@ export default {
     float: right;
     margin-right: 5em;
 }
+
+.log-icon{
+  font-size: 16px;
+  margin-right: 5px;
+  transform: translate(0px,-5px);
+}
+
 
 .neon {
     color: #cce7f8;
