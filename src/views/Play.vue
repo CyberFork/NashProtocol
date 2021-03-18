@@ -14,27 +14,119 @@
                 <!-- 散点图 -->
                 <Charts :options="historyLogs" style="height: 300px"></Charts>
                 <!-- 菜单tab -->
-                <a-tabs default-active-key="1" @change="callback" class="strategy-tabs">
-                  <a-tab-pane key="1" tab="我的">
-                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs">
-                      <a-list-item slot="renderItem" slot-scope="item, index"> </a-list-item>
-                    </a-list>
-                    <!-- 预言机菜单 -->
-                    <!-- <span v-if="oracleMenu">
-                      <button style="width: 100%;margin-bottom: 5px;" type="button" class="btn btn-success" data-toggle="modal" data-target="#staticBackdropCreateOracle" @click="openCreateOracle">
-                        Create Oracle
-                      </button>
-                      <h5 class="card-title">Lobby:</h5>
-                      <a href="#" style="width: 100%;" class="btn btn-warning" @click="getJoinAbleOracles()"> {{ classificationTexts[0] }}</a>
-                      <h5 class="card-title">My Created:</h5>
-                      <a href="#" style="width: 100%;margin-bottom: 5px;" class="btn btn-primary" @click="getMyCreateWaitJoin()"> {{ classificationTexts[1] }}</a>
-                      <a href="#" style="width: 100%;margin-bottom: 5px;" class="btn btn-danger" @click="getMyCreateWaitAnneal()"> {{ classificationTexts[2] }}</a>
-                      <h5 class="card-title">My Joined:</h5>
-                      <a href="#" style="width: 100%;margin-bottom: 5px;" class="btn btn-dark" @click="getMyJoinedWaitAnneal()"> {{ classificationTexts[3] }}</a>
-                    </span> -->
+                <a-tabs :activeKey="activeKey" @change="callback" class="strategy-tabs" animated>
+                  <!-- 大厅 -->
+                  <a-tab-pane v-show="tabMode === 1" key="0" disabled>
+                    <a-tag slot="tab" color="purple">
+                      <a-icon type="reconciliation" style="font-size: 16px;vertical-align: -50%;" />
+                      大厅 >>>
+                    </a-tag>
                   </a-tab-pane>
-                  <a-tab-pane key="2" tab="全部" force-render>
-                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs">
+                  <!-- 可加入的 -->
+                  <a-tab-pane v-if="tabMode === 1" key="1" tab="可加入的">
+                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '1'">
+                      <a-list-item slot="renderItem" slot-scope="oracleData, index">
+                        <!-- 可加入的卡片 -->
+                        <a-card size="small" v-show="joiningOracleID !== oracleData.OracleID">
+                          <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
+                            <template slot="title">
+                              <span>#{{ oracleData.OracleID }}</span>
+                            </template>
+                            <template slot="avatar">
+                              <icon-font type="icon-goldcup" style="margin-right: 5px"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
+                            </template>
+                          </a-card-meta>
+                          <a-divider style="margin:12px 0"></a-divider>
+                          <a-card-grid>
+                            <div>
+                              <div class="strategy-tabs-icon">
+                                <a-icon type="check" :style="{ transform: 'translate(-100%, -30%)' }" />
+                              </div>
+                              <span>**** NAP</span>
+                            </div>
+                            <div>
+                              <span>**** BNB/NAP</span>
+                            </div>
+                          </a-card-grid>
+                          <a-card-grid>
+                            <div class="strategy-tabs-icon"><a-icon type="loading" :style="{ transform: 'translate(-100%, -30%)' }" /></div>
+                            <span>等待加入</span>
+                          </a-card-grid>
+                          <a-divider style="opacity:0"></a-divider>
+                          <div class="strategy-tabs-div-left">
+                            <a-icon type="block" :style="{ 'font-size': '16px', 'margin-right': '5px' }" /><span>{{ oracleData.markBlock }}</span>
+                          </div>
+                          <div class="strategy-tabs-div-right">
+                            <a-icon type="hourglass" :style="{ 'font-size': '16px', 'margin-right': '5px' }" /><span>{{ oracleData.waitBlocks }}</span>
+                          </div>
+                          <a-divider style="opacity:0"></a-divider>
+                          <div style="margin-bottom: 1em">
+                            <a-button
+                              type="primary"
+                              @click="
+                                {
+                                  joiningOracleID = oracleData.OracleID;
+                                  oracle_join_joinfee = oracleData.joinFee;
+                                }
+                              "
+                              >加入对局</a-button
+                            >
+                          </div>
+                        </a-card>
+
+                        <!-- 可加入的卡片步骤二 -->
+                        <a-card size="small" v-show="joiningOracleID === oracleData.OracleID">
+                          <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
+                            <template slot="title">
+                              <a-icon type="arrow-left" @click="joiningOracleID = ''" />
+                            </template>
+                            <template slot="avatar">
+                              <icon-font type="icon-goldcup" style="margin-right: 5px"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
+                            </template>
+                          </a-card-meta>
+                          <a-divider style="margin:12px 0"></a-divider>
+                          <!-- 支付区 -->
+                          <br />
+                          <div>
+                            <p style="text-align: left;margin-left: 5em;">你 支付</p>
+                            <p style="text-align: left;margin-left: 5em;">NAP</p>
+                            <a-input size="large" class="strategy-tabs-input" type="number" v-model="oracle_joing_bidFee"> </a-input>
+                          </div>
+                          <br />
+                          <!-- 策略区 -->
+                          <div class="bg-card padding-box">
+                            <a-button size="large" class="btn-warning neon" @click="oracle_myStrategy = 1">
+                              ✌
+                            </a-button>
+                            <a-divider type="vertical" />
+                            <a-button size="large" class=" btn-success neon" @click="oracle_myStrategy = 2">
+                              ✊
+                            </a-button>
+                            <a-divider type="vertical" />
+                            <a-button size="large" class=" btn-info neon" @click="oracle_myStrategy = 3">
+                              ✋
+                            </a-button>
+                          </div>
+                          <a-divider style="opacity:0"></a-divider>
+                          <small v-if="(oracle_join_joinfee != '') & (oracle_joing_bidFee != '')" style="text-align: center;display: block;">
+                            【{{ oracle_joing_bidFee / (oracle_join_joinfee * 0.95) }} $NAP/${{ coinName[netWork] }}】
+                          </small>
+                          <br />
+                          <div style="margin-bottom: 1em"><a-button type="primary" @click="joinOracleAndSetGoteRawStg(oracleData)">提交报价</a-button></div>
+                        </a-card>
+                      </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- 我创建的 -->
+                  <a-tab-pane v-show="tabMode === 1" key="-1" disabled>
+                    <a-tag slot="tab" color="purple">
+                      <a-icon type="reconciliation" style="font-size: 16px;vertical-align: -50%;" />
+                      我创建的 >>>
+                    </a-tag>
+                  </a-tab-pane>
+                  <!-- 等待加入 -->
+                  <a-tab-pane v-if="tabMode === 1" key="2" tab="等待加入" force-render>
+                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '2'">
                       <a-list-item slot="renderItem" slot-scope="item, index">
                         <!-- 加入卡片 -->
                         <a-card size="small" v-show="item.event === 'newOracleCreateAndHashStgSet'">
@@ -103,7 +195,32 @@
                       </button>
                     </span> -->
                   </a-tab-pane>
-                  <a-tag color="purple" slot="tabBarExtraContent"> 报价记录 {{ NAPDBN.BSC }} </a-tag>
+                  <!-- 等待仲裁 -->
+                  <a-tab-pane v-show="tabMode === 1" key="3" tab="等待仲裁">
+                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '3'">
+                      <a-list-item slot="renderItem" slot-scope="item, index"> </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <!-- 我加入的 -->
+                  <a-tab-pane v-show="tabMode === 1" key="-2" disabled>
+                    <a-tag slot="tab" color="purple">
+                      <a-icon type="reconciliation" style="font-size: 16px;vertical-align: -50%;" />
+                      我加入的 >>>
+                    </a-tag>
+                  </a-tab-pane>
+                  <!-- 等待仲裁 -->
+                  <a-tab-pane v-show="tabMode === 1" key="4" tab="等待仲裁">
+                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs">
+                      <a-list-item slot="renderItem" slot-scope="item, index"> </a-list-item>
+                    </a-list>
+                  </a-tab-pane>
+                  <a-dropdown-button slot="tabBarExtraContent">
+                    切换菜单
+                    <a-menu slot="overlay" @click="handleTabs">
+                      <a-menu-item key="1"> <a-icon type="compass" />卡片列表 </a-menu-item>
+                      <a-menu-item key="2"> <a-icon type="compass" />最近日志 </a-menu-item>
+                    </a-menu>
+                  </a-dropdown-button>
                 </a-tabs>
                 <!-- 卡片列表 -->
               </div>
@@ -340,154 +457,9 @@
                   </a-carousel>
                 </div>
               </div>
-
-              <div class="card-body">
-                <div style="display:inline-block;width: 100%;">
-                  <div v-for="oracleData in OracleDatas" class="card" style="width: 18rem;float: left;" :key="oracleData.index">
-                    <div class="card-body">
-                      <h5 class="card-title">
-                        OracleID : #{{ oracleData.OracleID }}<a class="toCopy" style="cursor: pointer;" :data-clipboard-text="'My 【OracleID is #' + oracleData.OracleID + '】Let\'s have a showdown'">📑</a>
-                      </h5>
-                      <!-- p标签 -->
-                      <p class="card-text"></p>
-                      <div class="container">
-                        <div class="row">
-                          <div class="col">{{ web3js.utils.fromWei(oracleData.joinFee, "ether") }}{{ coinName[netWork] }}</div>
-                          <div class="col">
-                            {{ fingers[oracleData.myUintInTheOracle] }}
-                          </div>
-                          <div class="w-100"></div>
-                          <div class="col">waitBlocks : {{ oracleData.waitBlocks }}</div>
-                          <div class="w-100"></div>
-                          <!-- TODO:根据筛选情况显示，大厅应该是建立时区块高度。其他是对应的过期高度 -->
-                          <div class="col">
-                            {{ filterText[FilterState] }}
-                            {{ oracleData.markBlock }}
-                          </div>
-                        </div>
-                      </div>
-                      <a
-                        v-if="(MyState == 0) & (FilterState == 1)"
-                        href="#"
-                        style="float: right;position: absolute;
-                                                    right: 1rem;
-                                                    bottom: 1rem;"
-                        class="btn btn-success btn-sm"
-                        data-toggle="modal"
-                        data-target="#staticBackdropJoinOracle"
-                        @click="joinButtonClick(oracleData)"
-                        >Join</a
-                      >
-                      <a
-                        v-if="(MyState == 201) & (FilterState == 1)"
-                        href="#"
-                        style="float: right;position: absolute;
-                                                    right: 1rem;
-                                                    bottom: 1rem;"
-                        class="btn btn-danger btn-sm"
-                        @click="cancelButtonClick(oracleData)"
-                        >Cancel</a
-                      >
-                      <a
-                        v-if="(MyState == 201) & (FilterState == 2)"
-                        href="#"
-                        style="float: right;position: absolute;
-                                                    right: 1rem;
-                                                    bottom: 1rem;"
-                        class="btn btn-danger btn-sm"
-                        data-toggle="modal"
-                        data-target="#staticBackdropAnnealOracle"
-                        @click="annealButtonClick(oracleData)"
-                        >Anneal</a
-                      >
-                      <!-- &(oracleData.markBlock < BlockNumber) -->
-                      <a
-                        v-if="(MyState == 4) & (FilterState == 2)"
-                        :class="{
-                          disabled: oracleData.markBlock > BlockNumber,
-                        }"
-                        href="#"
-                        style="float: right;position: absolute;
-                                                    right: 1rem;
-                                                    bottom: 1rem;"
-                        class="btn btn-dark btn-sm"
-                        @click="expiredButtonClick(oracleData)"
-                        >Finish</a
-                      >
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
-        <!-- Oracle logs -->
-        <!-- <div v-else class="col-9" style="min-width: 23rem;">
-          <section>
-            <div class="card" style="min-height: 20rem; max-height: 38rem;overflow: auto;">
-              <div class="card-body">
-                <span v-if="logsType == 1">
-                  <div v-for="olog in OracleLogs" :key="olog.index" class="alert alert-success">
-                    You created 【#{{ olog.returnValues.OracleID }}】 oracle at blockNumber:{{ olog.blockNumber }} 【JoinFee:{{ web3js.utils.fromWei(String(olog.returnValues.JoinFee), "ether") }}${{
-                      coinName[netWork]
-                    }}】. 【WatiBlock:{{ olog.returnValues.WaitBlocks }}】.【Encrypted Strategy : {{ olog.returnValues.stgHash }}】
-                    <a :href="`https://${blockExplorer[netWork]}/tx/` + olog.transactionHash" target="_blank">↗</a>
-                  </div>
-                </span>
-                <span v-if="logsType == 2">
-                  <div v-for="olog in OracleLogs" :key="olog.index" class="alert alert-success">
-                    You joined 【#{{ olog.returnValues.OracleID }}】 oracle at blockNumber:{{ olog.blockNumber }} 【Your bid:{{ web3js.utils.fromWei(String(olog.returnValues.GoteOracleBid), "ether") }}】.
-                    【Your Strategy:{{ fingers[olog.returnValues.Strategy_Raw] }}】
-                    <a :href="`https://${blockExplorer[netWork]}/tx/` + olog.transactionHash" target="_blank">↗</a>
-                  </div>
-                </span>
-                <span v-if="logsType == 3">
-                  <div v-for="olog in OracleLogs" :key="olog.index" class="alert alert-success">
-                    【😁:You Win🎉!】 Oracle【#{{ olog.returnValues.OracleID }}】 【🏆:{{ web3js.utils.fromWei(String(olog.returnValues.Prize), "ether") }}${{ coinName[netWork] }}】.【InitStg:{{
-                      fingers[olog.returnValues.Strategy_Init]
-                    }}】.【GoteStg:{{ fingers[olog.returnValues.Strategy_Gote] }}】.【OraclePrice:{{ parseFloat(String((2 * olog.returnValues.ValidBid) / olog.returnValues.Prize)).toLocaleString() }}$NAP/${{
-                      coinName[netWork]
-                    }}】.【OverReason:{{ oracle_overReason[olog.returnValues.Reason] }}】
-                    <a :href="`https://${blockExplorer[netWork]}/tx/` + olog.transactionHash" target="_blank">↗</a>
-                  </div>
-                </span>
-                <span v-if="logsType == 4">
-                  <div v-for="olog in OracleLogs" :key="olog.index" class="alert alert-success">
-                    【#{{ olog.returnValues.OracleID }}】oracle created by 【{{ olog.returnValues.Creater }}】at blockNumber:{{ olog.blockNumber }} 【JoinFee:{{
-                      web3js.utils.fromWei(String(olog.returnValues.JoinFee), "ether")
-                    }}${{ coinName[netWork] }}】. 【WatiBlock:{{ olog.returnValues.WaitBlocks }}】.【Encrypted Strategy : {{ olog.returnValues.stgHash }}】
-                    <a :href="`https://${blockExplorer[netWork]}/tx/` + olog.transactionHash" target="_blank">↗</a>
-                  </div>
-                </span>
-                <span v-if="logsType == 5">
-                  <div v-for="olog in OracleLogs" :key="olog.index" class="alert alert-success">
-                    【{{ olog.returnValues.Player }}】 joined 【#{{ olog.returnValues.OracleID }}】 oracle at blockNumber:{{ olog.blockNumber }} 【 Bid $NAP:{{
-                      web3js.utils.fromWei(String(olog.returnValues.GoteOracleBid), "ether")
-                    }}】. The Strategy:{{ fingers[olog.returnValues.Strategy_Raw] }}】
-                    <a :href="`https://${blockExplorer[netWork]}/tx/` + olog.transactionHash" target="_blank">↗</a>
-                  </div>
-                </span>
-                <span v-if="logsType == 6">
-                  <div v-for="olog in OracleLogs" :key="olog.index" class="alert alert-success">
-                    【#{{ olog.returnValues.OracleID }}】Oracle Annealed @{{ olog.blockNumber }}【Winner🎉:{{ olog.returnValues.Winner }}】. 【🏆:{{
-                      web3js.utils.fromWei(String(olog.returnValues.Prize), "ether")
-                    }}${{ coinName[netWork] }}】.【InitStg:{{ fingers[olog.returnValues.Strategy_Init] }}】.【GoteStg:{{ fingers[olog.returnValues.Strategy_Gote] }}】.【OraclePrice:{{
-                      parseFloat(String((2 * olog.returnValues.ValidBid) / olog.returnValues.Prize)).toLocaleString()
-                    }}$NAP/${{ coinName[netWork] }}】.【OverReason:{{ oracle_overReason[olog.returnValues.Reason] }}】
-                    <a :href="`https://${blockExplorer[netWork]}/tx/` + olog.transactionHash" target="_blank">↗</a>
-                  </div>
-                </span>
-                <span v-if="logsType == 7">
-                  <div v-for="olog in OracleLogs" :key="olog.index" class="alert alert-success">
-                    【{{ olog.returnValues.CreaterAndCanceler }}】Canceled【#{{ olog.returnValues.OracleID }}】Oracle
-
-                    <a :href="`https://${blockExplorer[netWork]}/tx/` + olog.transactionHash" target="_blank">↗</a>
-                  </div>
-                </span>
-              </div>
-            </div>
-          </section>
-        </div> -->
       </div>
       <hr />
       <!-- 底部菜单 -->
@@ -543,59 +515,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 加入预言机 -->
-    <a-modal :visible="staticBackdropJoinOracle" :footer="null" :closable="false" centered id="staticBackdropJoinOracle" style=";">
-      <div>
-        <div>
-          <div class="modal-header">
-            <h5 class="modal-title" id="staticBackdropLabel">Join Oracle #{{ joiningOracleID }}</h5>
-            <button type="button" class="close" @click="closeJoinOracle">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="alert alert-primary" role="alert" style="text-align: center;display: block;">
-              <small> | 🏆Prize: {{ joiningOraclePrize }}{{ coinName[netWork] }}</small>
-              <small>
-                | 💴JoinFee:
-                {{ web3js.utils.fromWei(joiningOracleJoinFee) }}{{ coinName[netWork] }}
-                |
-              </small>
-              <br />
-              <small> | 💡Create@: {{ joiningOracleCreateAt }} | </small>
-              <small>⏳WaitBlocks: {{ joiningOracleWaitBlock }} | </small>
-            </div>
-            <span class="btn-group mr-2" style="width: 100%;margin-bottom: 5px;" role="group" aria-label="First group">
-              <button type="button" class="btn btn-warning neon" @click="oracle_myStrategy = 1">
-                ✌
-              </button>
-              <button type="button" class="btn btn-success neon" @click="oracle_myStrategy = 2">
-                ✊
-              </button>
-              <button type="button" class="btn btn-primary neon" @click="oracle_myStrategy = 3">
-                ✋
-              </button>
-            </span>
-            <input class="input-group-text" style="width: 100%;margin-bottom: 5px;" type="number" placeholder="$NAP Bid(default is 0)" v-model="oracle_joing_bidFee" />
-            <small v-if="(oracle_join_joinfee != '') & (oracle_joing_bidFee != '')" style="text-align: center;display: block;">
-              【{{ oracle_joing_bidFee / (oracle_join_joinfee * 0.95) }} $NAP/${{ coinName[netWork] }}】
-              <br />
-              【{{ (oracle_join_joinfee * 0.95) / oracle_joing_bidFee }} ${{ coinName[netWork] }}/$NAP】
-            </small>
-          </div>
-          <div class="modal-footer">
-            <div v-if="showAlertAtOracleCreate" style="width: 100%;" class="alert alert-danger" role="alert">
-              {{ alertAtOracleCreate }}
-            </div>
-            <div v-if="!showAlertAtOracleCreate" style="width: 100%;" class="alert alert-success" role="alert">
-              {{ alertAtOracleCreate }}
-            </div>
-            <a href="#" style="width: 100%;" class="btn btn-info" @click="joinOracleAndSetGoteRawStg(joiningOracleID)">Join Oracle</a>
-          </div>
-        </div>
-      </div>
-    </a-modal>
 
     <!-- 等待卡片 -->
     <a-modal :visible="staticBackdropPending" :footer="null" :closable="false" centered id="staticBackdropPending" style="position: fixed;top:30%">
@@ -677,6 +596,13 @@
       <p>JoinFee： 【{{ create_joinfee.number }}】 {{ coinName[netWork] }}</p>
       <p>BidFee: 【{{ create_bidFee.number }}】 $NAP for 95% JoinFee</p>
       <p>EntropyRaw: 【{{ create_rawEntropy }}】</p>
+      <p>Strategy: 【{{ fingers[oracle_myStrategy] }}】</p>
+    </a-modal>
+    <!-- 加入提示卡片 -->
+    <a-modal v-model="confirmJoinOracle" title="确认加入信息" @ok="handleJoinOracle">
+      <p>waitBlock： 【{{ oracle_create_waitblocks }}】</p>
+      <p>JoinFee： 【{{ web3js.utils.fromWei(String(create_joinfee.number), "ether") }}】 {{ coinName[netWork] }}</p>
+      <p>BidFee: 【{{ create_bidFee.number }}】 $NAP for 95% JoinFee</p>
       <p>Strategy: 【{{ fingers[oracle_myStrategy] }}】</p>
     </a-modal>
   </div>
@@ -841,10 +767,14 @@ export default {
       oracleJoinedContent: "",
       dt: "",
       // 交互数据
+      oracleId: "",
+      tabMode: 1,
       cardMode: 1,
+      activeKey: "1",
       diceSpin: false,
       tagCardMode: 1,
       createOracleStep: 1,
+      confirmJoinOracle: false,
       confirmCreateOracle: false,
       staticBackdropPending: false,
       staticBackdropAnnealed: false,
@@ -1119,8 +1049,6 @@ export default {
     async getAllLogs() {
       this.myLogs = [];
       // this.logsType = 4;
-      console.log(this.BlockNumber);
-      console.log(this.NAPContract.options);
       const allLogs = (
         await this.NAPContract.getPastEvents("allEvents", {
           filter: {},
@@ -1154,7 +1082,6 @@ export default {
       });
       // this.OracleLogs = this.dt;
       this.myLogs = this.dt;
-      console.log(this.myLogs);
       this.updateToastAndShow("All Oracle logs", `Fetched ${this.dt.length} Recently created logs.`);
     },
     async getMyCreateLogs() {
@@ -1364,9 +1291,7 @@ export default {
         });
     },
     /*
-     *@Author: yozora
-     *@Description: 加入预言机
-     *@Date: 2021-03-15 20:59:17
+      ? Deprecated
      */
     joinButtonClick(oracleData) {
       this.oracle_joing_bidFee = "";
@@ -1379,53 +1304,32 @@ export default {
       this.joiningOracleJoinFee = oracleData.joinFee;
       this.joiningOracleWaitBlock = oracleData.waitBlocks;
     },
-    joinOracleAndSetGoteRawStg(ooid) {
-      let oid = parseInt(ooid);
+    /*
+     *@Author: yozora
+     *@Description: 加入预言机
+     *@Date: 2021-03-17 22:48:11
+     */
+    joinOracleAndSetGoteRawStg(oracleData) {
+      // this.oracleId = parseInt(oracleData.OracleID);
       if (this.oracle_myStrategy == 0) {
-        // alert('Please select strategy.');
-        // this.alertAtOracleCreate = 'Please select strategy.';
-        this.updateAlertInOracleCreate(true, "Please select strategy✌✊✋.");
+        message.error("Please select strategy✌✊✋.", 2);
         return;
       } else if (Number(this.oracle_joing_bidFee) > Number(this.napsInWallet1e18) / 1e18) {
-        this.updateAlertInOracleCreate(true, "Insufficient $NAPs in bank for bid fee.");
+        message.error("Insufficient $NAPs in bank for bid fee.", 2);
         return;
       }
       if (this.oracle_joing_bidFee == "") {
-        // alert('Please full data.');
-        // this.alertAtOracleCreate = 'Please full data.';
         this.oracle_joing_bidFee = 0;
-        // this.updateAlertInOracleCreate(true, 'Please input bid fee.');
-        // return
       }
-      this.updateToastAndShow("Join Oracle", `Pending:【#${oid}】Oracle Joining  …… ……`);
-      this.updateAlertInOracleCreate(false, `Pending:【${this.fingers[this.oracle_myStrategy]}】 Joining Oracle …… ……`);
-      // console.log(oid,this.oracle_myStrategy,this.oracle_joing_bidFee,web3js.utils.toWei(String(this.oracle_join_joinfee)))
-      this.staticBackdropPending = true;
-      // document.getElementById("#staticBackdropPending").modal("show");
-      this.staticBackdropJoinOracle = false;
-      // document.getElementById("#staticBackdropJoinOracle").modal("hide");
+      // 更新通知信息
+      this.oracle_create_waitblocks = oracleData.waitBlocks;
+      this.create_joinfee.number = oracleData.joinFee;
+      this.create_bidFee.number = this.oracle_joing_bidFee;
 
-      // $('#staticBackdropPending').modal('show')
-      // $('#staticBackdropJoinOracle').modal('hide')
-      this.NAPContract.methods
-        .joinOracleAndSetGoteRawStg(oid, this.oracle_myStrategy, this.web3js.utils.toWei(String(this.oracle_joing_bidFee)))
-        .send({
-          from: this.addressNow,
-          value: this.web3js.utils.toWei(String(this.oracle_join_joinfee)),
-        })
-        .then(rst => {
-          console.log(rst);
-          this.updateAlertInOracleCreate(
-            false,
-            `Success: 【#${oid}】Oracle joined. You can close this window and click button:【My joined, wait init to anneal】to see it. If the oracle expired you can finish it and direct win.`
-          );
-          // this.updateToastAndShow('Join Oracle', `Success:Oracle joined.`);
-          // 加入之后→刷新显示可以继续加入的，Filter OID保持不变
-          (this.MyState = 0) & (this.FilterState = 1) & this.getWaitJoinOracleIDsRL(this.oracle_filter_IdStart, this.LimitsReturn);
-          this.staticBackdropPending = false;
-          // document.getElementById("#staticBackdropPending").modal("hide");
-          // $('#staticBackdropPending').modal('hide')
-        });
+      // 更新加入信息
+      this.oracle_join_joinfee = this.web3js.utils.fromWei(oracleData.joinFee, "ether");
+      this.joiningOracleID = oracleData.OracleID;
+      this.confirmJoinOracle = true;
     },
     // anneal
     async annealButtonClick(oracleData) {
@@ -1582,8 +1486,8 @@ export default {
       this.updateToastAndShow(`Claim $${this.coinName[this.netWork]}s`, `Success: Claimed ${this.ethUnclaimF} $${this.coinName[this.netWork]}s to wallet.`);
     },
     // 5 Oracle 查询方法
-    getJoinAbleOracles() {
-      (this.cfBtnNumber = 0) & (this.MyState = 0) & (this.FilterState = 1) & this.getWaitJoinOracleIDsRL(this.oracle_filter_IdStart, this.LimitsReturn);
+    async getJoinAbleOracles() {
+      (this.cfBtnNumber = 0) & (this.MyState = 0) & (this.FilterState = 1) & (await this.getWaitJoinOracleIDsRL(this.oracle_filter_IdStart, this.LimitsReturn));
     },
     getMyCreateWaitJoin() {
       (this.cfBtnNumber = 1) & (this.MyState = 201) & (this.FilterState = 1) & this.getMyOracleIDsRLByState(this.FilterState, this.MyState, this.oracle_filter_IdStart, this.LimitsReturn);
@@ -1594,18 +1498,23 @@ export default {
     getMyJoinedWaitAnneal() {
       (this.cfBtnNumber = 3) & (this.MyState = 4) & (this.FilterState = 2) & this.getMyOracleIDsRLByState(this.FilterState, this.MyState, this.oracle_filter_IdStart, this.LimitsReturn);
     },
-
-    getWaitJoinOracleIDsRL(_startID, _limit) {
+    /*
+     *@Author: yozora
+     *@Description: 查询可加入预言机
+     *@Date: 2021-03-17 14:23:47
+     */
+    async getWaitJoinOracleIDsRL(_startID, _limit) {
       if (_startID == "") {
         _startID = 1;
       }
+      this.myLogs = [];
       this.OracleDatas = [];
+      let cacheOracleDatas = [];
       this.updateToastAndShow(`${this.filterButtonText[1][0]} Refresh`, `Please wait, fetching ${this.filterButtonText[1][0]} datas …… ……`);
-      this.NAPContract.methods
+      await this.NAPContract.methods
         .getWaitJoinOracleIDsRL(_startID, _limit)
         .call({ from: this.addressNow })
         .then(OracleIDRLs => {
-          let cacheOracleDatas = [];
           for (let i = 0; OracleIDRLs[0][i] != 0; i++) {
             this.NAPContract.methods
               .Oracles(OracleIDRLs[0][i])
@@ -1613,12 +1522,15 @@ export default {
               .then(rst2 => {
                 rst2.OracleID = OracleIDRLs[0][i];
                 rst2.myUintInTheOracle = OracleIDRLs[1][i];
-                this.cacheOracleDatas.push(rst2);
+                cacheOracleDatas.push(rst2);
+                cacheOracleDatas.forEach(item => console.log(item));
               });
           }
-          this.OracleDatas = cacheOracleDatas;
           this.updateToastAndShow(`${this.filterButtonText[1][0]}`, `Success: Oracle ID in range 【#${_startID}~#${Number(_startID) + Number(_limit) - 1}】——> Fetched ${this.filterButtonText[1][0]} datas.`);
         });
+      // 可加入预言机
+      this.OracleDatas = cacheOracleDatas;
+      this.myLogs = cacheOracleDatas;
     },
     getMyOracleIDsRLByState(_state, _myState, _startID, _limit) {
       if (_startID == "") {
@@ -1700,7 +1612,6 @@ export default {
       this.NAPContract.events
         .GoteJoinedAndRawStgSet({ filter: { OracleID: _oids }, fromBlock: this.BlockNumber - 4900 }, function(error, event) {
           this.dt = event;
-
           try {
             this.oracleJoinedTitle = `#${event.returnValues.OracleID} been joined: 【${this.fingers[parseInt(event.returnValues.Strategy_Raw)]}】 & 【${this.web3js.utils.fromWei(
               String(event.returnValues.GoteOracleBid),
@@ -1711,8 +1622,6 @@ export default {
           } catch (error) {
             console.log(event, "error", error);
           }
-
-          // x.splice(x.indexOf(3),1)
         })
         .on("data", function() {
           // console.log('.on(data',event); // same results as the optional callback above
@@ -1821,7 +1730,7 @@ export default {
       this.LSCache = LocalData_Cache.fetch();
       this.LSSent = LocalData_Sent.fetch();
       this.LSWaitJoin = LocalData_WaitJoin.fetch();
-
+      console.log(`LSWaitJoin:${this.LSWaitJoin}`);
       this.initUserData();
     },
     async initUserData() {
@@ -1843,26 +1752,13 @@ export default {
     // 操作菜单
     callback(key) {
       if (key === "1") {
-        // 加载我的卡片
-        this.myLogs = [
-          {
-            title: "Title 1",
-          },
-          {
-            title: "Title 2",
-          },
-          {
-            title: "Title 3",
-          },
-          {
-            title: "Title 4",
-          },
-        ];
-        this.oracleMenu = true;
+        // 加载大厅-可加入的
+        this.activeKey = "1";
+        this.getJoinAbleOracles();
       } else {
         // 加载全部卡片
+        this.activeKey = "2";
         this.getAllLogs();
-        this.oracleMenu = false;
       }
     },
     /*
@@ -1896,9 +1792,7 @@ export default {
     closeAnnealed() {
       this.staticBackdropAnnealed = false;
     },
-    // changeCard() {
-
-    // },
+    handleTabs() {},
     /*
      *@Author: yozora
      *@Description: 通知信息
@@ -1962,14 +1856,8 @@ export default {
       this.LSCache.push({ EncryptedStg, hsetp, stg, bid });
       LocalData_Cache.save(this.LSCache);
 
-      // this.updateToastAndShow("Create Oracle", `Pending:Create Oracle  …… ……`);
-      // this.updateAlertInOracleCreate(false, "Pending: Create Oracle …… ……");
-
       // 弹出框
-      // this.staticBackdropCreateOracle = false;
       this.staticBackdropPending = true;
-      // this.isPending = true;
-
       this.NAPContract.methods
         .createOracleAndSetHashStg(this.oracle_create_waitblocks, EncryptedStg)
         .send({
@@ -1978,16 +1866,14 @@ export default {
         })
         .then(rst => {
           this.dt = rst;
-          console.log(rst);
+          console.log(`createOracle:${rst}`);
           let oid = parseInt(rst.events.newOracleCreateAndHashStgSet.returnValues.OracleID);
-          // this.updateAlertInOracleCreate(false, `Success: 【#${oid}】Oracle Created, you can close this window now.`);
           // 记录发出的加密策略的原象
           this.LSSent[oid] = { hsetp, stg, bid };
           LocalData_Sent.save(this.LSSent);
           // 删除防止刷新丢失捕捉的加密策略原象
           this.LSCache.pop();
           LocalData_Cache.save(this.LSCache);
-
           //获取创建后等待gote的列表展示：创建后→展示自己创建可以取消的
           (this.cfBtnNumber = 1) &
             (oid - 9 < 0 ? (this.oracle_filter_IdStart = 0) : (this.oracle_filter_IdStart = oid - 9)) &
@@ -1996,7 +1882,6 @@ export default {
             this.getMyOracleIDsRLByState(this.FilterState, this.MyState, this.oracle_filter_IdStart, this.LimitsReturn);
 
           // 弹出框
-          // this.isPending = false;
           this.staticBackdropPending = false;
 
           this.sleep(1000);
@@ -2008,12 +1893,47 @@ export default {
         .catch(e => {
           console.log(e);
           if (e.code === 4001) {
-            // this.isPending = false;
             this.staticBackdropPending = false;
             message.warning("你取消了支付", 2);
           }
         });
       this.confirmCreateOracle = false;
+    },
+    /*
+     *@Author: yozora
+     *@Description: 加入预言机交互metamask
+     *@Date: 2021-03-17 23:08:45
+     */
+    handleJoinOracle() {
+      let oid = this.joiningOracleID;
+      this.updateToastAndShow("Join Oracle", `Pending:【#${oid}】Oracle Joining  …… ……`);
+      this.staticBackdropPending = true;
+      this.staticBackdropJoinOracle = false;
+      this.NAPContract.methods
+        .joinOracleAndSetGoteRawStg(oid, this.oracle_myStrategy, this.web3js.utils.toWei(String(this.oracle_joing_bidFee)))
+        .send({
+          from: this.addressNow,
+          value: this.web3js.utils.toWei(String(this.oracle_join_joinfee)),
+        })
+        .then(rst => {
+          console.log(`joinOracle:${rst}`);
+          this.updateAlertInOracleCreate(
+            false,
+            `Success: 【#${oid}】Oracle joined. You can close this window and click button:【My joined, wait init to anneal】to see it. If the oracle expired you can finish it and direct win.`
+          );
+          this.updateToastAndShow("Join Oracle", `Success:Oracle joined.`);
+          // 加入之后→刷新显示可以继续加入的，Filter OID保持不变
+          (this.MyState = 0) & (this.FilterState = 1) & this.getWaitJoinOracleIDsRL(this.oracle_filter_IdStart, this.LimitsReturn);
+          this.staticBackdropPending = false;
+        })
+        .catch(e => {
+          console.log(e);
+          if (e.code === 4001) {
+            this.staticBackdropPending = false;
+            message.warning("你取消了支付", 2);
+          }
+        });
+      this.confirmJoinOracle = false;
     },
   },
 };
@@ -2093,7 +2013,16 @@ export default {
   box-shadow: none;
 }
 
-.strategy-tabs >>> .ant-card.ant-card-bordered.ant-card-contain-grid.ant-card-small{
+.strategy-tabs-input {
+  box-shadow: inset 2px 2px 5px #8f8787;
+  background: rgb(255, 255, 255);
+  width: 50%;
+  float: right;
+  margin-right: 2em;
+  margin-top: -3em;
+}
+
+.strategy-tabs >>> .ant-card.ant-card-bordered.ant-card-contain-grid.ant-card-small,.ant-card.ant-card-bordered.ant-card-small{
     border-radius: 10px;
     background-color: rgba(242, 242, 242, 1);
 }
@@ -2112,6 +2041,10 @@ export default {
     margin-left: 5em;
     margin-top: -1px;
 }
+
+/* .strategy-tabs >>> .ant-tabs-tab.ant-tabs-tab-disabled{
+  background-color:rgba(242, 242, 242, 1);
+} */
 
 .strategy-tabs >>> .ant-card-meta-avatar{
     margin-right: 5em;

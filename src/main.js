@@ -2,12 +2,13 @@ import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import { Breadcrumb, Carousel, Divider, Layout, Button, Select, Result, Badge, Icon, Input, Tabs, Card, Modal, Menu, List, Tag } from "ant-design-vue";
+import { Breadcrumb, Carousel,Dropdown, Divider, Layout, Button, Select, Result, Badge, Icon, Input, Tabs, Card, Modal, Menu, List, Tag } from "ant-design-vue";
 import "./style/index.css";
 
 Vue.config.productionTip = false;
 Vue.use(Breadcrumb);
 Vue.use(Carousel);
+Vue.use(Dropdown);
 Vue.use(Divider);
 Vue.use(Layout);
 Vue.use(Select);
