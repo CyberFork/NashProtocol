@@ -589,9 +589,9 @@
                                     <div v-for="oracleData in OracleDatas" class="card"
                                         style="width: 18rem;float: left;">
                                         <div class="card-body">
-                                            <h5 class="card-title">OracleID : #{{oracleData.OracleID}}<a class="toCopy"
-                                                    style="cursor: pointer;"
-                                                    :data-clipboard-text="'My 【OracleID is #' + oracleData.OracleID + '】Let\'s have a showdown'">📑</a>
+                                            <h5 class="card-title">OracleID : #{{oracleData.OracleID}}
+                                                <a class="toCopy" v-if="FilterState == 1" style="cursor: pointer;"
+                                                    :data-clipboard-text="'The 【OracleID is #' + oracleData.OracleID + '】Let\'s have a showdown on Nashpt.co'">📑</a>
                                             </h5>
                                             <p class="card-text">
                                             <div class="container">
@@ -1364,6 +1364,8 @@
             },
             // create
             createOracleAndSetHashStg() {
+
+
                 if (this.oracle_create_waitblocks == '') {
                     this.oracle_create_waitblocks = 4000;
                 }
@@ -1400,9 +1402,15 @@
                     let stg = this.oracle_myStrategy;
                     let bid = web3js.utils.toWei(String(this.oracle_create_bidFee));
                     let EncryptedStg = this.encryption(hsetp, stg, bid);
-
+                    // 存入并验证缓存
+                    let cacheLengthBefore = this.LSCache.length;
                     this.LSCache.push({ EncryptedStg, hsetp, stg, bid });
                     LocalData_Cache.save(this.LSCache);
+                    sleep(100);//等待写入
+                    if (!(this.LSCache.length > cacheLengthBefore)) {//进行验证
+                        this.updateToastAndShow('Create Oracle', `Write preImage cache error …… ……`);
+                        return;
+                    };
 
                     this.updateToastAndShow('Create Oracle', `Pending:Create Oracle  …… ……`);
                     this.updateAlertInOracleCreate(false, 'Pending: Create Oracle …… ……');
@@ -1417,9 +1425,14 @@
                         // 记录发出的加密策略的原象
                         this.LSSent[oid] = { hsetp, stg, bid };
                         LocalData_Sent.save(this.LSSent);
-                        // 删除防止刷新丢失捕捉的加密策略原象
-                        this.LSCache.pop();
-                        LocalData_Cache.save(this.LSCache);
+                        console.log(rst.events.newOracleCreateAndHashStgSet.type)
+                        if (rst.events.newOracleCreateAndHashStgSet.transactionHash) {
+                            // 删除防止刷新丢失捕捉的加密策略原象
+                            console.log(rst.events.newOracleCreateAndHashStgSet.type)
+                            this.LSCache.pop();
+                            LocalData_Cache.save(this.LSCache);
+                        }
+
 
 
                         //获取创建后等待gote的列表展示：创建后→展示自己创建可以取消的
@@ -1450,8 +1463,10 @@
                     this.updateToastAndShow('Cancel Oracle', `Success:【#${oid}】Oracle Canceled.`);
                     this.getMyCreateWaitJoin();
                     // 删除sent 策略释放空间
-                    delete this.LSSent[oid];
-                    LocalData_Sent.save(this.LSSent);
+                    if (rst.events.OracleCanceled.transactionHash) {
+                        delete this.LSSent[oid];
+                        LocalData_Sent.save(this.LSSent);
+                    }
                     // 删除监听
                     this.deleteSubscribeJoin(oid);
                 })
@@ -1561,7 +1576,7 @@
                 let rst = await NAPContract.methods.makeAnneal(oid, ols.hsetp, ols.stg, ols.bid, _opponent).send({ from: this.addressNow });
                 this.dt = rst;
                 // 删除sent 策略释放空间
-                if (rst.events.OracleOver.type == "mined") {
+                if (rst.events.OracleOver.transactionHash) {
                     delete this.LSSent[oid];
                     LocalData_Sent.save(this.LSSent);
                 }
@@ -1722,6 +1737,14 @@
             },
             subscribeJoin(_oids) {
                 // if(_oids.length == 0) _oids = [0];
+                // console.log('_oids', _oids);
+                // if(_oids === undefined || _oids === [] ) oids = [0];
+                console.log('Listen_oids', _oids);
+                try {
+                    if (_oids.length == 0) _oids = [0];
+                } catch (error) {
+                    _oids = [0]
+                }
                 console.log('_oids', _oids);
                 NAPContract.events.GoteJoinedAndRawStgSet({ filter: { OracleID: _oids }, fromBlock: this.BlockNumber - 4900 }, function (error, event) {
 
