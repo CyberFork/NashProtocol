@@ -2,18 +2,21 @@
   <a-layout id="components-layout-demo-fixed">
     <a-layout-header :style="{ width: '100%' }">
       <!-- <div class="logo" /> -->
-      <Menu :collapsed="collapsed"></Menu>
+      <Menu class="bg-menu" :collapsed="collapsed"></Menu>
       <a-badge class="d_badge" dot>
         <a-icon style="font-size: 18px" type="notification" />
       </a-badge>
       <div class="d_addressNow">😎{{ address }}</div>
       <div class="d_network">📡{{ this.$store.state.network }}</div>
     </a-layout-header>
-    <a-layout-content :style="{ padding: '0 50px', marginTop: '64px' }">
+    <a-layout-content class="bg-content" :style="{ padding: '0 50px', marginTop: '64px' }">
+      <div id="stars"></div>
+      <div id="stars2"></div>
+      <div id="stars3"></div>
       <router-view></router-view>
     </a-layout-content>
-    <a-layout-footer :style="{ textAlign: 'center' }">
-      NASH Protocol ©2021 Created by NASH INTERNATIONAL
+    <a-layout-footer class="bg-footer" :style="{ textAlign: 'center' }">
+      <span>NASH Protocol ©2021 Created by NASH INTERNATIONAL</span>
     </a-layout-footer>
   </a-layout>
 </template>
@@ -44,9 +47,13 @@ export default {
 #components-layout-demo-fixed .logo {
   width: 120px;
   height: 31px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #a15e9c;
   margin: 16px 24px 16px 0;
   float: left;
+}
+
+.bg-menu {
+  background: #ca99e8;
 }
 
 .d_badge {
