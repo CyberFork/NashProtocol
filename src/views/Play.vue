@@ -8,11 +8,12 @@
       <div class="row">
         <div class="col-8" style="min-width: 13rem;">
           <aside>
-            <div class="card">
+            <div class="card bg-log">
+              <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
               <div class="card-body">
                 <!-- 创建预言机卡片 -->
                 <!-- 散点图 -->
-                <Charts :options="historyLogs" style="height: 300px"></Charts>
+                <Charts :historyLogs="historyLogs" style="height: 300px"></Charts>
                 <!-- 菜单tab -->
                 <a-tabs :activeKey="activeKey" @change="callback" class="strategy-tabs" animated>
                   <!-- 大厅 -->
@@ -394,21 +395,13 @@
             </div>
           </aside>
         </div>
-        <!-- 预言机面板及广告位 -->
+        <!-- *********************************预言机面板及广告位*********************************** -->
+        <!-- 预言机面板 -->
         <div class="col-4" style="min-width: 23rem;">
           <div class="container">
-            <div class="card" style="min-height: 20rem;overflow: auto;">
+            <div class="card bg-oracle" style="min-height: 20rem;overflow: auto;">
+              <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
               <div class="card-body">
-                <!-- <div style="display:inline-block;width: 100%;">
-                  <span style="float:right;margin-top: 0.4rem;"> ~ #{{ parseInt(oracle_filter_IdStart) + 9 }}</span>
-                  <input class="input-group-text" style="width: 30%;margin-bottom: 5px;float: right;" type="number" placeholder="OracleID >= (default is 1)" v-model="oracle_filter_IdStart" step="10" />
-                  <span style="float: right;margin-top: 0.4rem;">
-                    OracleID Filter: #
-                  </span>
-                  <h5 class="card-title">
-                    {{ classificationTexts[cfBtnNumber] }}
-                  </h5>
-                </div> -->
                 <!-- 创建预言机面板一 -->
                 <div class="card-shadow" style="display:inline-block;width: 100%;">
                   <a-card :bordered="false" size="small" v-show="createOracleStep === 1 && cardMode === 1">
@@ -489,7 +482,7 @@
                       <a-divider style="margin:12px 0;"></a-divider>
                       <!-- 种子区 -->
                       <a-input placeholder="请输入种子" v-model="create_rawEntropy">
-                        <icon-font @click="randomNum" slot="addonAfter" type="icon-Dice" style="font-size:24px" :spin="diceSpin" />
+                        <icon-font @click="randomNum" slot="addonAfter" type="icon-Dice" :style="diceStyle" :spin="diceSpin" />
                       </a-input>
                     </div>
                     <br />
@@ -586,7 +579,7 @@
                   </a-card>
                 </div>
               </div>
-              <br />
+              <!-- <a-divider></a-divider> -->
               <!-- 报价奖励 -->
               <div class="card-body">
                 <div class="card-shadow" style="display:inline-block;width: 100%;">
@@ -614,7 +607,7 @@
               <!-- 广告面板 -->
               <div class="card-body">
                 <div class="card-shadow" style="display:inline-block;width: 100%;">
-                  <a-carousel effect="fade" autoplay>
+                  <a-carousel effect="fade" autoplay :dots="false">
                     <div>
                       <span class="neon"><img style="float: left;margin: 40px -20px 0 40px;" src="../assets/nash.png" /><span>NASH Protocol 全球首家博弈报价预言机</span></span>
                     </div>
@@ -630,21 +623,15 @@
       </div>
       <hr />
       <!-- 底部菜单 -->
-      <div style="float: none;margin-bottom: 5px;z-index: 1;">
+      <!-- <div style="float: none;margin-bottom: 5px;z-index: 1;">
         <div class="row">
           <div class="col-12">
             <div class="card">
               <div class="card-body">
-                $NAPToken contract @:<a :href="`https://${blockExplorer[netWork]}/address/` + NAPAddress" target="blank"
+                <!-- $NAPToken contract @:<a :href="`https://${blockExplorer[netWork]}/address/` + NAPAddress" target="blank"
                   >{{ NAPAddress }}<a class="toCopy" style="cursor: pointer;" :data-clipboard-text="NAPAddress">📑</a>
-                </a>
-                <br />
-                Your Wallet :<a :href="`https://${blockExplorer[netWork]}/address/` + addressNow" target="blank">{{ addressNow }}</a> [ {{ napsInWalletF }} $NAP]
-                <hr />
-                <h5 class="card-title">PCO $NAP</h5>
-                <span class="btn btn-success" style="cursor:pointer;width: 100%;" @click="claimNAP()" title="To wallet">⬆——Click to claim: {{ napsUnclaimF }} $NAP to wallet——🎉</span>
-                <hr />
-                <h5 class="card-title">
+                </a> -->
+      <!-- <h5 class="card-title">
                   Shares:
                   <a target="_blank" :href="swapURL[netWork]"> {{ swapNAME[netWork] }}</a>
                   <button type="button" class="btn btn-light" @click="thisroveLPs()" style="float: right;" :title="`thisrove $NAP-${coinName[netWork]} LPToken for this Contract`">
@@ -680,7 +667,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div>  -->
     </div>
 
     <!-- 等待卡片 -->
@@ -776,6 +763,7 @@
 </template>
 
 <script>
+import { ParticlesBg } from "particles-bg-vue";
 import { notification, message } from "ant-design-vue";
 import Web3 from "web3";
 import { LocalData, LocalData_Cache, LocalData_Sent, LocalData_WaitJoin, myDate } from "../util/StorageUtils.js";
@@ -786,8 +774,7 @@ import MyCanvas from "../components/My-Canvas.vue";
 
 export default {
   components: {
-    // star
-    // svgIcon,
+    ParticlesBg,
     MyCanvas,
     IconFont,
     Charts,
@@ -801,8 +788,8 @@ export default {
       LPContract: null,
       LS_NetWork: null,
       getNetworkInterval: null,
-      ethereum: window.ethereum,
-      web3js: new Web3(window.ethereum),
+      ethereum: null,
+      web3js: null,
       addressNow: "0x0000000000000000000000000000000000000000",
       //LocalData_Cache.fetch(),
       LSCache: "",
@@ -834,11 +821,6 @@ export default {
         Kovan: "ETH",
         BSC: "BNB",
         BSCTest: "BNB",
-      },
-      blockExplorer: {
-        Kovan: "kovan.etherscan.io",
-        BSC: "bscscan.com",
-        BSCTest: "testnet.bscscan.com",
       },
       swapURL: {
         Kovan: "https://this.uniswap.org/#/swap?outputCurrency=0x0D54464EC49818BDaf6f42f465025A06CbD68ffD",
@@ -918,7 +900,46 @@ export default {
 
       /// oracle logs
       logsType: 0,
-      historyLogs: {},
+      historyLogs: [
+        [10.0, 8.04],
+        [8.07, 6.95],
+        [13.0, 7.58],
+        [9.05, 8.81],
+        [9.05, 8.8],
+        [9.05, 8.71],
+        [9.05, 8.7],
+        [9.05, 8.69],
+        [9.05, 8.68],
+        [9.05, 8.67],
+        [9.05, 8.66],
+        [9.05, 8.65],
+        [9.05, 8.64],
+        [9.05, 8.63],
+        [9.04, 8.62],
+        [9.03, 8.62],
+        [9.02, 8.62],
+        [9.01, 8.62],
+        [9.0, 8.62],
+        [9.06, 8.62],
+        [11.0, 8.33],
+        [14.0, 7.66],
+        [13.4, 6.81],
+        [10.0, 6.33],
+        [14.0, 8.96],
+        [12.5, 6.82],
+        [9.15, 7.2],
+        [11.5, 7.2],
+        [3.03, 4.23],
+        [12.2, 7.83],
+        [2.02, 4.47],
+        [1.05, 3.33],
+        [4.05, 4.96],
+        [6.03, 7.24],
+        [12.0, 6.26],
+        [12.0, 8.84],
+        [7.08, 5.82],
+        [5.02, 5.68],
+      ],
       myLogs: [],
       /// dialogs
       oracleOverContent: "",
@@ -940,6 +961,7 @@ export default {
       staticBackdropJoined: false,
       staticBackdropCreateOracle: true,
       staticBackdropJoinOracle: false,
+      diceStyle: { "font-size": "24px" },
       // create data new
       tokens: ["NAP", "Y3D", "SAVE", "MASK", "META", "BNB"],
       // 创建数据
@@ -970,8 +992,10 @@ export default {
     },
   },
   created() {
+    this.ethereum = window.ethereum;
+    this.web3js = new Web3(window.ethereum);
     this.ethereum.request({ method: "eth_requestAccounts" }).then(res => {
-      console.log("Now account:", res[0]);
+      console.log(`Now account:${res[0]}`);
       // -- set cyclicity refresh for set up contract instance
       this.getNetworkInterval = self.setInterval(this.getNetwork(), 2000);
       this.ethereum.autoRefreshOnNetworkChange = true;
@@ -983,165 +1007,14 @@ export default {
       });
     });
   },
-  mounted() {
-    this.historyLogs = {
-      title: {
-        // text: "ECharts 入门示例",
-        text: ["{a|0.023 }{b|BNB / }{x|NAP}"],
-        subtext: "$ 2.2 (+5%)过去24小时 数据来源于本站",
-        lineHeight: 56,
-        textStyle: {
-          rich: {
-            a: {
-              fontSize: "18px",
-            },
-            b: {
-              color: "gray",
-              // height: 40,
-            },
-            x: {
-              fontSize: 18,
-              fontWeight: "bold",
-              fontFamily: "Microsoft YaHei",
-            },
-          },
-        },
-      },
-      grid: {
-        show: true,
-        containLabel: false,
-        backgroundColor: "rgba(242, 242, 242, 1)",
-        x: 80,
-        y: 60,
-        x2: 80,
-        y2: 60,
-      },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "cross",
-        },
-      },
-      toolbox: {
-        show: true,
-        itemSize: 24,
-        emphasis: {
-          iconStyle: {
-            textFill: "rgba(0, 0, 0, 1)",
-          },
-        },
-        feature: {
-          myTool1: {
-            show: true,
-            title: "24小时",
-            icon:
-              "path://M725.333333 554.666667a42.666667 42.666667 0 1 1 0 85.333333v21.333333a42.666667 42.666667 0 1 1-85.333333 0v-21.333333h-106.666667a42.666667 42.666667 0 0 1-39.957333-57.642667l64-170.666666a42.666667 42.666667 0 0 1 79.914667 29.952L594.901333 554.666667H640v-42.666667a42.666667 42.666667 0 1 1 85.333333 0v42.666667z m128-364.842667V85.333333a42.666667 42.666667 0 1 1 85.333334 0v213.333334a42.666667 42.666667 0 0 1-42.666667 42.666666H682.666667a42.666667 42.666667 0 1 1 0-85.333333h115.584C726.464 175.68 623.317333 128 512 128 299.925333 128 128 299.925333 128 512s171.925333 384 384 384 384-171.925333 384-384a42.666667 42.666667 0 1 1 85.333333 0c0 259.2-210.133333 469.333333-469.333333 469.333333S42.666667 771.2 42.666667 512 252.8 42.666667 512 42.666667c131.648 0 254.08 54.656 341.333333 147.157333z m-409.216 369.706667L392.533333 618.666667H426.666667a42.666667 42.666667 0 1 1 0 85.333333h-128c-36.629333 0-56.234667-43.114667-32.149334-70.72l112.597334-129.024A21.333333 21.333333 0 1 0 341.333333 490.666667a42.666667 42.666667 0 1 1-85.333333 0 106.666667 106.666667 0 0 1 213.333333 0c0 25.152-8.789333 49.066667-25.216 68.864z",
-            onclick: function() {
-              alert("myToolHandler1");
-            },
-          },
-          myTool2: {
-            show: true,
-            title: "1周",
-            icon:
-              "path://M931.6 585.6l0 79c28.6-60.2 44.8-127.4 44.8-198.4C976.4 211 769.4 4 514.2 4S52 211 52 466.2c0 3.2 0.2 6.4 0.2 9.6l166-206 96.4 0L171.8 485.6l46.4 0 0-54.8 99.2-154.6 0 209.4 0 100 0 82.4-99.2 0 0-82.4L67.6 585.6c43 161 170.6 287.4 332.4 328.6-10.4 26.2-40.6 89.4-90.8 100.6-62.2 14 168.8 3.4 333.6-104.6 126.6-36.6 230.8-125.8 287.4-242.2l-97.6 0 0-82.4-166.2 0 0-87.2 0-12.8L666.4 476l166.2-206.2 94 0-140.4 215.8 46.4 0 0-59 99.2-154 0 213.2L931.8 585.6zM366.2 608c-4.8-11.2-7.2-23.2-7.2-36L359 357.6c0-12.8 2.4-24.8 7.2-36 4.8-11.2 11.4-21 19.6-29.2 8.2-8.2 18-14.8 29.2-19.6 11.2-4.8 23.2-7.2 36-7.2l81.6 0c12.8 0 24.8 2.4 36 7.2 11 4.8 20.6 11.2 28.8 19.2l-88.6 129.4 0-23c0-4.8-1.6-8.8-4.8-12-3.2-3.2-7.2-4.8-12-4.8-4.8 0-8.8 1.6-12 4.8-3.2 3.2-4.8 7.2-4.8 12l0 72L372.6 620C370.2 616.2 368 612.2 366.2 608zM624.4 572c0 12.8-2.4 24.8-7.2 36-4.8 11.2-11.4 21-19.6 29.2-8.2 8.2-18 14.8-29.2 19.6-11.2 4.8-23.2 7.2-36 7.2l-81.6 0c-12.8 0-24.8-2.4-36-7.2-11.2-4.8-21-11.4-29.2-19.6-3.6-3.6-7-7.8-10-12l99.2-144.6 0 50.6c0 4.8 1.6 8.8 4.8 12 3.2 3.2 7.2 4.8 12 4.8 4.8 0 8.8-1.6 12-4.8 3.2-3.2 4.8-7.2 4.8-12l0-99.6 92.6-135.2c6.6 7.4 12 15.8 16 25.2 4.8 11.2 7.2 23.2 7.2 36L624.2 572z",
-            onclick: function() {
-              alert("myToolHandler1");
-            },
-          },
-          myTool3: {
-            show: true,
-            title: "1月",
-            icon:
-              "path://M931.6 585.6l0 79c28.6-60.2 44.8-127.4 44.8-198.4C976.4 211 769.4 4 514.2 4S52 211 52 466.2c0 3.2 0.2 6.4 0.2 9.6l166-206 96.4 0L171.8 485.6l46.4 0 0-54.8 99.2-154.6 0 209.4 0 100 0 82.4-99.2 0 0-82.4L67.6 585.6c43 161 170.6 287.4 332.4 328.6-10.4 26.2-40.6 89.4-90.8 100.6-62.2 14 168.8 3.4 333.6-104.6 126.6-36.6 230.8-125.8 287.4-242.2l-97.6 0 0-82.4-166.2 0 0-87.2 0-12.8L666.4 476l166.2-206.2 94 0-140.4 215.8 46.4 0 0-59 99.2-154 0 213.2L931.8 585.6zM366.2 608c-4.8-11.2-7.2-23.2-7.2-36L359 357.6c0-12.8 2.4-24.8 7.2-36 4.8-11.2 11.4-21 19.6-29.2 8.2-8.2 18-14.8 29.2-19.6 11.2-4.8 23.2-7.2 36-7.2l81.6 0c12.8 0 24.8 2.4 36 7.2 11 4.8 20.6 11.2 28.8 19.2l-88.6 129.4 0-23c0-4.8-1.6-8.8-4.8-12-3.2-3.2-7.2-4.8-12-4.8-4.8 0-8.8 1.6-12 4.8-3.2 3.2-4.8 7.2-4.8 12l0 72L372.6 620C370.2 616.2 368 612.2 366.2 608zM624.4 572c0 12.8-2.4 24.8-7.2 36-4.8 11.2-11.4 21-19.6 29.2-8.2 8.2-18 14.8-29.2 19.6-11.2 4.8-23.2 7.2-36 7.2l-81.6 0c-12.8 0-24.8-2.4-36-7.2-11.2-4.8-21-11.4-29.2-19.6-3.6-3.6-7-7.8-10-12l99.2-144.6 0 50.6c0 4.8 1.6 8.8 4.8 12 3.2 3.2 7.2 4.8 12 4.8 4.8 0 8.8-1.6 12-4.8 3.2-3.2 4.8-7.2 4.8-12l0-99.6 92.6-135.2c6.6 7.4 12 15.8 16 25.2 4.8 11.2 7.2 23.2 7.2 36L624.2 572z",
-            onclick: function() {
-              alert("myToolHandler1");
-            },
-          },
-        },
-      },
-      dataZoom: [
-        {
-          id: "dataZoomX",
-          type: "inside",
-          xAxisIndex: [0],
-          filterMode: "filter",
-        },
-        // {
-        //   id: "dataZoomY",
-        //   type: "slider",
-        //   yAxisIndex: [0],
-        //   filterMode: "empty",
-        // },
-      ],
-      xAxis: [
-        {
-          show: true,
-          // axisPointer: {
-          //   show: true,
-          //   label: { show: true },
-          // },
-          axisTick: {
-            alignWithLabel: true,
-          },
-        },
-      ],
-      yAxis: [
-        {
-          show: false,
-          axisLine: {
-            show: true,
-            // lineStyle: {
-            //   color: colors[0],
-            // },
-          },
-          axisLabel: {
-            formatter: "{value} ml",
-          },
-        },
-      ],
-      series: [
-        {
-          symbolSize: 20,
-          data: [
-            [10.0, 8.04],
-            [8.07, 6.95],
-            [13.0, 7.58],
-            [9.05, 8.81],
-            [11.0, 8.33],
-            [14.0, 7.66],
-            [13.4, 6.81],
-            [10.0, 6.33],
-            [14.0, 8.96],
-            [12.5, 6.82],
-            [9.15, 7.2],
-            [11.5, 7.2],
-            [3.03, 4.23],
-            [12.2, 7.83],
-            [2.02, 4.47],
-            [1.05, 3.33],
-            [4.05, 4.96],
-            [6.03, 7.24],
-            [12.0, 6.26],
-            [12.0, 8.84],
-            [7.08, 5.82],
-            [5.02, 5.68],
-          ],
-          type: "scatter",
-        },
-      ],
-    };
-  },
   methods: {
     // 1 数据处理方法
     _formatBigNumber(_bn) {
-      // return web3js.utils.fromWei(_bn, 'ether');
       return parseFloat(this.web3js.utils.fromWei(_bn, "ether")).toLocaleString();
-      // parseFloat().toLocaleString();
     },
     /*
      *@Author: yozora
-     *@Description: 通知信息
+     *@Description: 通知卡片
      *@Date: 2021-03-11 17:12:54
      */
     updateToastAndShow(title, content) {
@@ -1214,7 +1087,6 @@ export default {
      */
     async getAllLogs() {
       this.myLogs = [];
-      // this.logsType = 4;
       const allLogs = (
         await this.NAPContract.getPastEvents("allEvents", {
           filter: {},
@@ -1224,7 +1096,6 @@ export default {
       this.dt = allLogs.filter(item => {
         return item.event === "newOracleCreateAndHashStgSet" || item.event === "GoteJoinedAndRawStgSet" || item.event === "OracleOver";
       });
-      // this.OracleLogs = this.dt;
       this.myLogs = this.dt;
       console.log(this.myLogs);
       this.updateToastAndShow("All Oracle logs", `Fetched ${this.dt.length} Recently created logs.`);
@@ -1311,7 +1182,6 @@ export default {
      *@Date: 2021-03-14 15:20:32
      */
     async getReJnLogs() {
-      // $('#staticBackdropPending').modal('show')
       this.OracleLogs = [];
       this.logsType = 5;
       this.dt = (
@@ -1321,7 +1191,6 @@ export default {
         })
       ).reverse();
       this.OracleLogs = this.dt;
-      // $('#staticBackdropPending').modal('hide')
       this.updateToastAndShow("All Oracle logs", `Fetched ${this.dt.length} Recently Joined logs.`);
     },
     /*
@@ -1330,7 +1199,6 @@ export default {
      *@Date: 2021-03-14 15:20:43
      */
     async getReOvLogs() {
-      // $('#staticBackdropPending').modal('show')
       this.OracleLogs = [];
       this.logsType = 6;
       this.dt = (
@@ -1340,7 +1208,6 @@ export default {
         })
       ).reverse();
       this.OracleLogs = this.dt;
-      // $('#staticBackdropPending').modal('hide')
       this.updateToastAndShow("All Oracle logs", `Fetched ${this.dt.length} Recently over logs.`);
     },
     /*
@@ -1952,8 +1819,10 @@ export default {
      */
     randomNum() {
       this.diceSpin = true;
+      this.diceStyle = { "font-size": "24px", color: "#722ed1", transform: "scale(2)" };
       setTimeout(() => {
         this.create_rawEntropy = Math.random();
+        this.diceStyle = { "font-size": "24px" };
         this.diceSpin = false;
       }, 2000);
     },
@@ -2147,6 +2016,38 @@ export default {
 
 <style scoped>
 
+.bg-log{
+background: rgb(255,251,240);
+  /* background-color:#4CC8CA; */
+  /* border:10px solid #4CC8CA; */
+	/* box-shadow:0 0 60px #245677;
+	-moz-box-shadow:0 0 60px #245677;
+	-webkit-box-shadow:0 0 60px #245677; */
+  	box-shadow:0 0 60px #4CC8CA;
+	-moz-box-shadow:0 0 60px #4CC8CA;
+	-webkit-box-shadow:0 0 60px #4CC8CA;
+}
+
+.bg-oracle{
+  background: rgb(255,251,240);
+    /* background-color:#CA99E8; */
+  /* border:10px solid #CA99E8; */
+	/* box-shadow:0 0 60px #5946A3;
+	-moz-box-shadow:0 0 60px #5946A3;
+	-webkit-box-shadow:0 0 60px #5946A3; */
+  	box-shadow:0 0 60px #CA99E8;
+	-moz-box-shadow:0 0 60px #CA99E8;
+	-webkit-box-shadow:0 0 60px #CA99E8;
+}
+
+.container >>> .ant-divider.ant-divider-horizontal{
+background-color: #5946a3;
+}
+
+.card-shadow >>> .ant-card.ant-card-small,.ant-card.ant-card-bordered,.ant-carousel{
+  border-radius: 1rem;
+}
+
 .neon:focus{
   background-color:rgba(242, 242, 242, 1);
 }
@@ -2298,12 +2199,12 @@ export default {
 
 .bg-card.padding-box >>> .ant-divider.ant-divider-vertical{
     height: 2em;
-    margin: 2em;
+    margin: 1em;
 }
 
 .card-shadow{
-    box-shadow: 2px 2px 5px 5px #8f8787;
-  border-radius: 10px;
+    /* box-shadow: 2px 2px 5px 5px #8f8787;
+  border-radius: 10px; */
 }
 
 .card-body >>>  .ant-card-meta-avatar{
@@ -2315,7 +2216,7 @@ export default {
 }
 
 .card-body >>> .ant-btn:focus {
-  color: #fff
+  color: #722ed1;
 }
 
 .ant-carousel >>> .slick-slide {

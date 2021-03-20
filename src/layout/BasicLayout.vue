@@ -6,13 +6,10 @@
       <a-badge class="d_badge" dot>
         <a-icon style="font-size: 18px" type="notification" />
       </a-badge>
-      <div class="d_addressNow">😎{{ address }}</div>
+      <div class="d_addressNow" @click="toBlock">📑{{ address }}</div>
       <div class="d_network">📡{{ this.$store.state.network }}</div>
     </a-layout-header>
-    <a-layout-content class="bg-content" :style="{ padding: '0 50px', marginTop: '64px' }">
-      <div id="stars"></div>
-      <div id="stars2"></div>
-      <div id="stars3"></div>
+    <a-layout-content class="bg-content" :style="{ padding: '0 50px' }">
       <router-view></router-view>
     </a-layout-content>
     <a-layout-footer class="bg-footer" :style="{ textAlign: 'center' }">
@@ -30,7 +27,6 @@ export default {
   },
   computed: {
     address() {
-      console.log(this.$store.state.addressNow);
       var temp = this.$store.state.addressNow;
       return temp.substring(0, 5) + "..." + temp.substring(temp.length - 4, temp.length);
     },
@@ -38,23 +34,35 @@ export default {
   data() {
     return {
       collapsed: false,
+      blockExplorer: {
+        Kovan: "kovan.etherscan.io",
+        BSC: "bscscan.com",
+        BSCTest: "testnet.bscscan.com",
+      },
     };
+  },
+  methods: {
+    toBlock() {
+      window.open(`https://${this.blockExplorer[this.$store.state.network]}/address/${this.$store.state.addressNow}`, "_blank");
+    },
   },
 };
 </script>
 
 <style>
-#components-layout-demo-fixed .logo {
+/* #components-layout-demo-fixed .logo {
   width: 120px;
   height: 31px;
   background: #a15e9c;
   margin: 16px 24px 16px 0;
   float: left;
+  z-index: 1;
 }
 
 .bg-menu {
   background: #ca99e8;
-}
+  z-index: 1;
+} */
 
 .d_badge {
   text-align: right;
@@ -65,7 +73,7 @@ export default {
 
 .d_badge:hover {
   cursor: pointer;
-  background-color: rgba(242, 242, 242, 1);
+  background-color: rgb(242, 242, 242);
 }
 
 .d_network {
@@ -80,5 +88,6 @@ export default {
   float: right;
   margin-top: -3.5em;
   margin-right: 5em;
+  cursor: pointer;
 }
 </style>

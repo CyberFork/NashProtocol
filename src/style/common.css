@@ -102,7 +102,7 @@
 #stars2:after {
   content: " ";
   position: absolute;
-  top: 2000px;
+  /* top: 2000px; */
   width: 2px;
   height: 2px;
   background: transparent;
@@ -147,7 +147,7 @@
 #stars3:after {
   content: " ";
   position: absolute;
-  top: 2000px;
+  /* top: 2000px; */
   width: 3px;
   height: 3px;
   background: transparent;
@@ -181,27 +181,6 @@
   color: #fff;
 }
 
-#cy {
-  position: relative;
-  width: 100%;
-  height: 30rem;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  z-index: 999;
-}
-
-body {
-  padding: 1vh;
-  /* background-image: url(./img/fqzdj.jpg);
-          background-repeat: repeat;
-          background-color: #E6E6E6; */
-  background-color: #111;
-  overflow-x: hidden;
-  min-height: 100rem;
-  /* overflow-y: hidden;   */
-}
 
 /* canvas {
   text-align: center;
@@ -280,18 +259,6 @@ body {
   line-height: 1.5;
   word-wrap: break-word;
 }
-
-/* .ant-divider,
-.ant-divider-vertical {
-  position: relative;
-  top: -0.06em;
-  display: inline-block;
-  width: 1px;
-  height: 0.9em;
-  margin: 0 8px;
-  vertical-align: middle;
-} */
-
 .ant-input-affix-wrapper.ant-input:focus {
   border: none;
   background: #f6f6f6;

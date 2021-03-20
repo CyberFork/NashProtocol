@@ -9,15 +9,123 @@ import _ from "lodash/debounce";
 
 export default {
   props: {
-    options: {
-      type: Object,
-      default: () => {},
+    historyLogs: {
+      type: Array,
+      default: [],
     },
+  },
+  data() {
+    return {
+      options: {
+        title: {
+          text: ["{a|0.023 }{b|BNB / }{x|NAP}"],
+          subtext: "$ 2.2 (+5%)过去24小时 数据来源于本站",
+          lineHeight: 56,
+          textStyle: {
+            rich: {
+              a: {
+                fontSize: "18px",
+              },
+              b: {
+                color: "gray",
+              },
+              x: {
+                fontSize: 18,
+                fontWeight: "bold",
+                fontFamily: "Microsoft YaHei",
+              },
+            },
+          },
+        },
+        grid: {
+          show: true,
+          containLabel: false,
+          backgroundColor: "rgba(242, 242, 242, 1)",
+          x: 80,
+          y: 60,
+          x2: 80,
+          y2: 60,
+        },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+          },
+        },
+        toolbox: {
+          show: true,
+          itemSize: 24,
+          emphasis: {
+            iconStyle: {
+              textFill: "rgba(0, 0, 0, 1)",
+            },
+          },
+          feature: {
+            myTool1: {
+              show: true,
+              title: "24小时",
+              icon: "image://../image/24hours.png",
+              onclick: function() {},
+            },
+            myTool2: {
+              show: true,
+              title: "1周",
+              icon: "image://../image/1week.png",
+              onclick: function() {},
+            },
+            myTool3: {
+              show: true,
+              title: "1月",
+              icon: "image://../image/1month.png",
+              onclick: function() {},
+            },
+          },
+        },
+        dataZoom: [
+          {
+            id: "dataZoomX",
+            type: "inside",
+            xAxisIndex: [0],
+            filterMode: "filter",
+          },
+        ],
+        xAxis: [
+          {
+            show: true,
+            axisTick: {
+              alignWithLabel: true,
+            },
+          },
+        ],
+        yAxis: [
+          {
+            show: false,
+            axisLine: {
+              show: true,
+            },
+            axisLabel: {
+              formatter: "{value} ml",
+            },
+          },
+        ],
+        series: [
+          {
+            symbolSize: 20,
+            data: this.historyLogs,
+            type: "scatter",
+            itemStyle: {
+              color: "rgb(202, 153, 232)",
+              shadowColor: 'rgb(202, 153, 232)',
+              shadowBlur: 10
+            },
+          },
+        ],
+      },
+    };
   },
   watch: {
     // 监听options值变化修改图标
     options(val) {
-      console.log(this.options);
       this.chart.setOption(val);
     },
   },
