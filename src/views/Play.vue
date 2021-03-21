@@ -15,6 +15,21 @@
                 <!-- 散点图 -->
                 <Charts :historyLogs="historyLogs" style="height: 300px"></Charts>
                 <!-- 菜单tab -->
+                <div style="text-align: left">
+                  <a-dropdown>
+                    <!-- 切换菜单 -->
+                    <a-tag color="purple" @click="e => e.preventDefault()"> 切换菜单 <a-icon type="down" style="transform: translate(0px, -3px);" class="log-icon" /> </a-tag>
+                    <a-menu slot="overlay" @click="handleTabs">
+                      <a-menu-item key="1"> <a-icon type="compass" />卡片列表 </a-menu-item>
+                      <a-menu-item key="2"> <a-icon type="compass" />最近日志 </a-menu-item>
+                      <a-menu-item disabled>
+                        <a-icon type="compass" style="transform: translate(0px, -3px);" />OracleID Filter: #
+                        <a-input style="width: 30%" type="number" placeholder="OracleID >= (default is 1)" v-model="oracle_filter_IdStart" step="10"> </a-input>
+                        <span> ~ #{{ parseInt(oracle_filter_IdStart) + 9 }}</span></a-menu-item
+                      >
+                    </a-menu>
+                  </a-dropdown>
+                </div>
                 <a-tabs :activeKey="activeKey" @change="callback" class="strategy-tabs" animated>
                   <!-- 大厅 -->
                   <a-tab-pane v-if="tabMode === 1" key="0" disabled>
@@ -69,7 +84,7 @@
                         <a-card size="small" v-show="joiningOracleID === oracleData.OracleID">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
-                              <a-icon type="arrow-left" @click="joiningOracleID = ''" />
+                              <a-icon type="arrow-left" class="log-icon" @click="joiningOracleID = ''" />
                             </template>
                             <template slot="avatar">
                               <icon-font type="icon-goldcup" class="log-icon"></icon-font><span>{{ web3js.utils.fromWei(String(oracleData.joinFee), "ether") }}${{ coinName[netWork] }}</span>
@@ -77,33 +92,34 @@
                           </a-card-meta>
                           <a-divider style="margin:12px 0"></a-divider>
                           <!-- 支付区 -->
-                          <br />
-                          <div>
-                            <p style="text-align: left;margin-left: 5em;">你 支付</p>
-                            <p style="text-align: left;margin-left: 5em;">NAP</p>
-                            <a-input size="large" class="strategy-tabs-input" type="number" v-model="oracle_joing_bidFee"> </a-input>
-                          </div>
-                          <br />
+                          <a-card-grid style="background-color: rgba(242, 242, 242, 1);">
+                            <div>
+                              <p style="text-align: left;">你 支付</p>
+                              <p style="text-align: left;">NAP</p>
+                              <a-input size="large" class="strategy-tabs-input" type="number" v-model="oracle_joing_bidFee"> </a-input>
+                            </div>
+                          </a-card-grid>
                           <!-- 策略区 -->
-                          <div class="bg-card padding-box">
-                            <a-button size="large" class="btn-warning neon" @click="oracle_myStrategy = 1">
-                              ✌
-                            </a-button>
-                            <a-divider type="vertical" />
-                            <a-button size="large" class=" btn-success neon" @click="oracle_myStrategy = 2">
-                              ✊
-                            </a-button>
-                            <a-divider type="vertical" />
-                            <a-button size="large" class=" btn-info neon" @click="oracle_myStrategy = 3">
-                              ✋
-                            </a-button>
-                          </div>
-                          <a-divider style="opacity:0"></a-divider>
-                          <small v-if="(oracle_join_joinfee != '') & (oracle_joing_bidFee != '')" style="text-align: center;display: block;">
-                            【{{ oracle_joing_bidFee / (oracle_join_joinfee * 0.95) }} $NAP/${{ coinName[netWork] }}】
-                          </small>
-                          <br />
-                          <div style="margin-bottom: 1em"><a-button style="width: 70%;" type="primary" @click="joinOracleAndSetGoteRawStg(oracleData)">提交报价</a-button></div>
+                          <a-card-grid style="background-color: rgba(242, 242, 242, 1);">
+                            <div class="bg-card padding-box">
+                              <a-button size="large" class="btn-warning neon" @click="oracle_myStrategy = 1">
+                                ✌
+                              </a-button>
+                              <a-divider type="vertical" />
+                              <a-button size="large" class=" btn-success neon" @click="oracle_myStrategy = 2">
+                                ✊
+                              </a-button>
+                              <a-divider type="vertical" />
+                              <a-button size="large" class=" btn-info neon" @click="oracle_myStrategy = 3">
+                                ✋
+                              </a-button>
+                            </div>
+                            <!-- <a-divider style="opacity:0"></a-divider> -->
+                            <small style="text-align: center;display: block;margin: 15px 0;">
+                              【{{ oracle_joing_bidFee / (web3js.utils.fromWei(String(oracleData.joinFee), "ether") * 0.95) }} $NAP/${{ coinName[netWork] }}】
+                            </small>
+                            <div><a-button style="width: 100%;" type="primary" @click="joinOracleAndSetGoteRawStg(oracleData)">提交报价</a-button></div>
+                          </a-card-grid>
                         </a-card>
                       </a-list-item>
                     </a-list>
@@ -294,33 +310,53 @@
                   </a-tab-pane>
                   <!-- 我创建的日志 -->
                   <a-tab-pane v-if="tabMode === 2" key="5" tab="我创建的">
-                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '5'">
+                    <a-list bordered style="text-align: left" item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '5'">
                       <a-list-item slot="renderItem" slot-scope="oracleLog, index">
-                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
-                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
-                          <!-- <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /> -->
+                        <a-list-item-meta>
+                          <h3 slot="title">#{{ oracleLog.returnValues.OracleID }}</h3>
+                          <div slot="description">
+                            <!-- <p><a-icon type="user-add" class="log-icon" />Creator: {{ oracleLog.returnValues.Creater }}</p> -->
+                            <p><icon-font type="icon-bitcoin-encryption" class="log-icon" />JoinFee: {{ web3js.utils.fromWei(String(oracleLog.returnValues.JoinFee), "ether") }}${{ coinName[netWork] }}</p>
+                            <p><a-icon type="block" class="log-icon" />WaitBlocks: {{ oracleLog.returnValues.WaitBlocks }}</p>
+                            <p><a-icon type="bulb" class="log-icon" />strategyHash: {{ oracleLog.returnValues.stgHash }}</p>
+                          </div>
                         </a-list-item-meta>
                       </a-list-item>
                     </a-list>
                   </a-tab-pane>
                   <!-- 我加入的日志 -->
                   <a-tab-pane v-if="tabMode === 2" key="6" tab="我加入的">
-                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '6'">
+                    <a-list bordered style="text-align: left" item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '6'">
                       <a-list-item slot="renderItem" slot-scope="oracleLog, index">
-                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
-                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
-                          <!-- <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /> -->
+                        <a-list-item-meta>
+                          <h3 slot="title">#{{ oracleLog.returnValues.OracleID }}</h3>
+                          <div slot="description">
+                            <p><a-icon type="block" class="log-icon" />BlockNumber: {{ oracleLog.blockNumber }}</p>
+                            <!-- <p><a-icon type="user-add" class="log-icon" />You Address : {{ oracleLog.returnValues.Player }}</p> -->
+                            <p><icon-font type="icon-bitcoin-encryption" class="log-icon" />You Bid: {{ web3js.utils.fromWei(String(oracleLog.returnValues.GoteOracleBid), "ether") }}NAP</p>
+                            <p><a-icon type="bulb" class="log-icon" />You strategy: {{ fingers[oracleLog.returnValues.Strategy_Raw] }}</p>
+                          </div>
                         </a-list-item-meta>
                       </a-list-item>
                     </a-list>
                   </a-tab-pane>
                   <!-- 我获胜的日志 -->
                   <a-tab-pane v-if="tabMode === 2" key="7" tab="我获胜的">
-                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '7'">
+                    <a-list bordered style="text-align: left" item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '7'">
                       <a-list-item slot="renderItem" slot-scope="oracleLog, index">
-                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
-                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
-                          <!-- <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /> -->
+                        <a-list-item-meta>
+                          <h3 slot="title">#{{ oracleLog.returnValues.OracleID }}</h3>
+                          <div slot="description">
+                            <p><icon-font type="icon-xiqingfenweiqingzhulihua" class="log-icon" />Congratulations You Win!</p>
+                            <p><icon-font type="icon-goldcup" class="log-icon" />Reward: {{ web3js.utils.fromWei(String(oracleLog.returnValues.Prize), "ether") }}${{ coinName[netWork] }}</p>
+                            <p><a-icon type="block" class="log-icon" />Creator strategy: {{ fingers[oracleLog.returnValues.Strategy_Init] }}</p>
+                            <p><a-icon type="bulb" class="log-icon" />Challenger strategy: {{ fingers[oracleLog.returnValues.Strategy_Gote] }}</p>
+                            <p>
+                              <icon-font type="icon-bitcoin-encryption" class="log-icon" />OraclePrice:
+                              {{ parseFloat(String((2 * oracleLog.returnValues.ValidBid) / oracleLog.returnValues.Prize)).toLocaleString() }}$NAP/${{ coinName[netWork] }}
+                            </p>
+                            <!-- <p><a-icon type="profile" class="log-icon" />OverReason: {{ oracle_overReason[oracleLog.returnValues.Reason] }}</p> -->
+                          </div>
                         </a-list-item-meta>
                       </a-list-item>
                     </a-list>
@@ -350,11 +386,16 @@
                   </a-tab-pane>
                   <!-- 最近加入日志 -->
                   <a-tab-pane v-if="tabMode === 2" key="9" tab="最近加入的">
-                    <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '9'">
+                    <a-list bordered style="text-align: left" item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '9'">
                       <a-list-item slot="renderItem" slot-scope="oracleLog, index">
-                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
-                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
-                          <!-- <a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" /> -->
+                        <a-list-item-meta>
+                          <h3 slot="title">#{{ oracleLog.returnValues.OracleID }}</h3>
+                          <div slot="description">
+                            <p><a-icon type="block" class="log-icon" />BlockNumber: {{ oracleLog.blockNumber }}</p>
+                            <!-- <p><a-icon type="user-add" class="log-icon" />You Address : {{ oracleLog.returnValues.Player }}</p> -->
+                            <p><icon-font type="icon-bitcoin-encryption" class="log-icon" />You Bid: {{ web3js.utils.fromWei(String(oracleLog.returnValues.GoteOracleBid), "ether") }}NAP</p>
+                            <p><a-icon type="bulb" class="log-icon" />You strategy: {{ fingers[oracleLog.returnValues.Strategy_Raw] }}</p>
+                          </div>
                         </a-list-item-meta>
                       </a-list-item>
                     </a-list>
@@ -363,8 +404,19 @@
                   <a-tab-pane bordered style="text-align: left" v-if="tabMode === 2" key="10" tab="最近结束的">
                     <a-list item-layout="horizontal" :data-source="OracleLogs" v-if="activeKey === '10'">
                       <a-list-item slot="renderItem" slot-scope="oracleLog, index">
-                        <a-list-item-meta description="Ant Design, a design language for background applications, is refined by Ant UED Team">
-                          <a slot="title" href="https://www.antdv.com/">{{ oracleLog.OracleID }}</a>
+                        <a-list-item-meta>
+                          <h3 slot="title">#{{ oracleLog.returnValues.OracleID }}</h3>
+                          <div slot="description">
+                            <p><a-icon type="user-add" class="log-icon" />Winner: {{ oracleLog.returnValues.Winner }}</p>
+                            <p><icon-font type="icon-goldcup" class="log-icon" />Reward: {{ web3js.utils.fromWei(String(oracleLog.returnValues.Prize), "ether") }}${{ coinName[netWork] }}</p>
+                            <p><a-icon type="block" class="log-icon" />Creator strategy: {{ fingers[oracleLog.returnValues.Strategy_Init] }}</p>
+                            <p><a-icon type="bulb" class="log-icon" />Challenger strategy: {{ fingers[oracleLog.returnValues.Strategy_Gote] }}</p>
+                            <p>
+                              <icon-font type="icon-bitcoin-encryption" class="log-icon" />OraclePrice:
+                              {{ parseFloat(String((2 * oracleLog.returnValues.ValidBid) / oracleLog.returnValues.Prize)).toLocaleString() }}$NAP/${{ coinName[netWork] }}
+                            </p>
+                            <p><a-icon type="profile" class="log-icon" />OverReason: {{ oracle_overReason[oracleLog.returnValues.Reason] }}</p>
+                          </div>
                         </a-list-item-meta>
                       </a-list-item>
                     </a-list>
@@ -376,19 +428,12 @@
                         <a-list-item-meta>
                           <h3 slot="title">#{{ oracleLog.returnValues.OracleID }}</h3>
                           <div slot="description">
-                            <p><a-icon type="user-delete" class="log-icon" />Creator: {{ oracleLog.returnValues.CreaterAndCanceler }}</p>
+                            <p><a-icon type="user-add" class="log-icon" />Creator: {{ oracleLog.returnValues.CreaterAndCanceler }}</p>
                           </div>
                         </a-list-item-meta>
                       </a-list-item>
                     </a-list>
                   </a-tab-pane>
-                  <a-dropdown-button slot="tabBarExtraContent">
-                    切换菜单
-                    <a-menu slot="overlay" @click="handleTabs">
-                      <a-menu-item key="1"> <a-icon type="compass" />卡片列表 </a-menu-item>
-                      <a-menu-item key="2"> <a-icon type="compass" />最近日志 </a-menu-item>
-                    </a-menu>
-                  </a-dropdown-button>
                 </a-tabs>
                 <!-- 卡片列表 -->
               </div>
@@ -447,7 +492,7 @@
                       <p style="text-align: left;margin-left: 10px;">你 支付</p>
                       <a-input-group compact>
                         <a-select style="width:100px;" class="strategy-select strategy-bottom" v-model="create_bidFee.unit">
-                          <a-select-option v-for="item in tokens" :key="item" :value="item">{{ item }}</a-select-option>
+                          <a-select-option v-for="item in ['NAP']" :key="item" :value="item">{{ item }}</a-select-option>
                         </a-select>
                         <a-input class="strategy-input-bottom" type="number" v-model="create_bidFee.number"> </a-input>
                       </a-input-group>
@@ -591,12 +636,13 @@
                     </a-card-meta>
                     <a-divider></a-divider>
                     <div>
-                      <span>1000 NAP</span
+                      <span>{{ napsUnclaimF }} NAP</span
                       ><a-button
                         style="border: 0;
                         background: gray;
                         margin-left: 5em;"
                         type="primary"
+                        @click="claimNAP()"
                         >收取</a-button
                       >
                     </div>
@@ -623,51 +669,6 @@
       </div>
       <hr />
       <!-- 底部菜单 -->
-      <!-- <div style="float: none;margin-bottom: 5px;z-index: 1;">
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body">
-                <!-- $NAPToken contract @:<a :href="`https://${blockExplorer[netWork]}/address/` + NAPAddress" target="blank"
-                  >{{ NAPAddress }}<a class="toCopy" style="cursor: pointer;" :data-clipboard-text="NAPAddress">📑</a>
-                </a> -->
-      <!-- <h5 class="card-title">
-                  Shares:
-                  <a target="_blank" :href="swapURL[netWork]"> {{ swapNAME[netWork] }}</a>
-                  <button type="button" class="btn btn-light" @click="thisroveLPs()" style="float: right;" :title="`thisrove $NAP-${coinName[netWork]} LPToken for this Contract`">
-                    thisrove
-                  </button>
-                </h5>
-                <div class="row" style="margin-bottom: 5px;">
-                  <div class="col-7">
-                    <a :title="`My $NAP-{{coinName[netWork]}} LPToken Locked Mining`">{{ lpTokenLockedF }} {{ pairName[netWork] }} LPToken</a>
-                  </div>
-                  <div class="col-5" :title="'My Hoe in Pool proportion:' + myLPproportion + '%'">
-                    <span style="position: absolute;left: -0.4rem;top: -0.3rem;">⛏</span>
-                    <span class="progress">
-                      <span class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" :style="'width: ' + myLPproportion + '%'">
-                        {{ myLPproportion }}%</span
-                      >
-                    </span>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="btn-group" role="group" aria-label="First group" style="cursor:pointer;width: 100%;">
-                    <input type="number" class="form-control" v-model="LPs_v_WD" placeholder="Amount" aria-label="Amount" />
-                    <button type="button" class="btn btn-primary" @click="deposits(LPs_v_WD)" title="To mine field.">
-                      ↑deposit
-                    </button>
-                    <button type="button" class="btn btn-primary" @click="withdraws(LPs_v_WD)" title="To wallet">
-                      ↓withdraw
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="btn btn-secondary" @click="claimAllETH()" title="To wallet." style="width: 100%;">unClaim ${{ coinName[netWork] }}: {{ ethUnclaimF }} Click to ClaimALL</button>
-            </div>
-          </div>
-        </div>
-      </div>  -->
     </div>
 
     <!-- 等待卡片 -->
@@ -711,15 +712,17 @@
       <div>
         <div>
           <div class="modal-header">
-            <h5 class="modal-title" id="staticBackdropLabel">
-              🎊Oracle Annealed!
-            </h5>
+            <h5 class="modal-title" id="staticBackdropLabel">🎊 {{ oracleOverContent.OracleID }} Oracle Annealed!</h5>
             <button type="button" class="close" @click="closeAnnealed">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
-            {{ oracleOverContent }}
+            <p>{{ oracleOverContent.Result }}</p>
+            <p>{{ oracleOverContent.Reward }}</p>
+            <p>{{ oracleOverContent.Creator_strategy }}</p>
+            <p>{{ oracleOverContent.Challenger_strategy }}</p>
+            <p>{{ oracleOverContent.OraclePrice }}</p>
           </div>
           <div class="modal-footer"></div>
         </div>
@@ -755,7 +758,7 @@
     <!-- 加入提示卡片 -->
     <a-modal :visible="confirmJoinOracle" title="确认加入信息" @ok="handleJoinOracle">
       <p>waitBlock： 【{{ joiningOracleWaitBlock }}】</p>
-      <p>JoinFee： 【{{ web3js.utils.fromWei(String(oracle_join_joinfee), "ether") }}】 {{ coinName[netWork] }}</p>
+      <p>JoinFee： 【{{ oracle_join_joinfee }}】 {{ coinName[netWork] }}</p>
       <p>BidFee: 【{{ oracle_joing_bidFee }}】 $NAP for 95% JoinFee</p>
       <p>Strategy: 【{{ fingers[oracle_myStrategy] }}】</p>
     </a-modal>
@@ -791,9 +794,7 @@ export default {
       ethereum: null,
       web3js: null,
       addressNow: "0x0000000000000000000000000000000000000000",
-      //LocalData_Cache.fetch(),
       LSCache: "",
-      //LocalData_Sent.fetch(),
       LSSent: "",
       LSWaitJoin: "",
       LSD: LocalData.fetch(),
@@ -854,10 +855,10 @@ export default {
                 This toast will been used to show notification when get feedback from blockChain and will auto close in 5 mins.",
 
       //Oracle数据
-      isPending: false,
+      isPending: true,
       oracle_filter_joinfee: "",
       oracle_filter_waitblocks: "",
-      oracle_filter_IdStart: LocalData.fetch()[0] == undefined ? 1 : LocalData.fetch()[0], // LocalData.fetch(),
+      oracle_filter_IdStart: LocalData.fetch()[0] == undefined ? 1 : LocalData.fetch()[0],
       oracle_create_joinfee: "",
       oracle_create_waitblocks: "",
       oracle_create_rawEntropy: "",
@@ -871,7 +872,6 @@ export default {
         2: "✊",
         3: "✋",
       },
-      OracleDatas: [],
       OracleLogs: [],
       // 1:in lobby not joined ,2:wait you to anneal ,3: wait init to anneal,4:expired
       FilterState: 0,
@@ -892,10 +892,10 @@ export default {
       alertAtOracleCreate: "",
       showAlertAtOracleCreate: false,
       oracle_overReason: {
-        0: "AnnealInitWin",
-        1: "AnnealGoteWin",
+        0: "Creator Win",
+        1: "Challenger Win",
         2: "CriticalAnnealed",
-        3: "AnnealExpiredOracle",
+        3: "Expired Oracle",
       },
 
       /// oracle logs
@@ -942,7 +942,7 @@ export default {
       ],
       myLogs: [],
       /// dialogs
-      oracleOverContent: "",
+      oracleOverContent: {},
       oracleJoinedTitle: "",
       oracleJoinedContent: "",
       dt: "",
@@ -963,10 +963,10 @@ export default {
       staticBackdropJoinOracle: false,
       diceStyle: { "font-size": "24px" },
       // create data new
-      tokens: ["NAP", "Y3D", "SAVE", "MASK", "META", "BNB"],
+      tokens: [],
       // 创建数据
       create_joinfee: {
-        unit: "BNB",
+        unit: "",
         number: 0,
       },
       create_bidFee: {
@@ -1022,6 +1022,7 @@ export default {
       this.timeNow = myDate.toLocaleDateString() + "-" + myDate.toLocaleTimeString();
       this.toastTitle = title;
       this.toastContent = content;
+      // console.log("通知卡弹出");
       this.openNotification();
     },
     /*
@@ -1119,6 +1120,7 @@ export default {
       });
       // this.OracleLogs = this.dt;
       this.myLogs = this.dt;
+      console.log(this.dt);
       this.updateToastAndShow("All Oracle logs", `Fetched ${this.dt.length} Recently created logs.`);
     },
     async getMyCreateLogs() {
@@ -1131,6 +1133,7 @@ export default {
         })
       ).reverse();
       this.OracleLogs = this.dt;
+      console.log(this.dt);
       this.updateToastAndShow("My Oracle logs", `Fetched ${this.dt.length} My created logs.`);
     },
     async getMyJoinedLogs() {
@@ -1144,6 +1147,7 @@ export default {
       ).reverse();
       this.OracleLogs = this.dt;
       this.updateToastAndShow("My Oracle logs", `Fetched ${this.dt.length} My joined logs.`);
+      console.log(this.dt);
     },
     async getMyWonLogs() {
       this.OracleLogs = [];
@@ -1155,6 +1159,7 @@ export default {
         })
       ).reverse();
       this.OracleLogs = this.dt;
+      console.log(this.dt);
       this.updateToastAndShow("My Oracle logs", `Fetched ${this.dt.length} My won logs.`);
     },
     /*
@@ -1191,6 +1196,7 @@ export default {
         })
       ).reverse();
       this.OracleLogs = this.dt;
+      console.log(this.dt);
       this.updateToastAndShow("All Oracle logs", `Fetched ${this.dt.length} Recently Joined logs.`);
     },
     /*
@@ -1208,6 +1214,7 @@ export default {
         })
       ).reverse();
       this.OracleLogs = this.dt;
+      console.log(this.dt);
       this.updateToastAndShow("All Oracle logs", `Fetched ${this.dt.length} Recently over logs.`);
     },
     /*
@@ -1251,11 +1258,10 @@ export default {
     // 4 数据写入链上方法
     async claimNAP() {
       this.updateToastAndShow("Claim $NAPs", `Pending: Claim ${this.napsUnclaimF} $NAPs to wallet …… ……`);
-      // let rst = await this.NAPContract.methods.PCO_claimNAP().send({ from: this.addressNow });
+      await this.NAPContract.methods.PCO_claimNAP().send({ from: this.addressNow });
       this.updateToastAndShow("Claim $NAPs", `Success: Claimed ${this.napsUnclaimF} $NAPs to wallet.`);
       await this.getMyUnclaimNAP();
       await this.getMyNAPsInWallet();
-      // console.log(rst);
     },
     // create预言机
     /*
@@ -1298,7 +1304,6 @@ export default {
       this.confirmCreateOracle = true;
     },
     encryption(hsetp, stg, bid) {
-      // hsetp = web3js.utils.keccak256(hsetp);
       return this.web3js.utils.keccak256(this.web3js.eth.abi.encodeParameters(["string", "uint256", "uint256"], [hsetp, stg, bid]));
     },
     /*
@@ -1308,18 +1313,26 @@ export default {
      */
     cancelButtonClick(oracleData) {
       let oid = parseInt(oracleData.OracleID);
+      this.staticBackdropPending = true;
       this.updateToastAndShow(`Cancel Oracle`, `Pending: Oracle【#${oid}】 Cancel  …… ……`);
       this.NAPContract.methods
         .cancelOracle(oid)
         .send({ from: this.addressNow })
-        .then(() => {
+        .then(rst => {
           this.updateToastAndShow("Cancel Oracle", `Success:【#${oid}】Oracle Canceled.`);
           this.getMyCreateWaitJoin();
           // 删除sent 策略释放空间
-          delete this.LSSent[oid];
-          LocalData_Sent.save(this.LSSent);
+          if (rst.events.OracleCanceled.transactionHash) {
+            delete this.LSSent[oid];
+            LocalData_Sent.save(this.LSSent, this.LS_NetWork);
+          }
           // 删除监听
           this.deleteSubscribeJoin(oid);
+          this.staticBackdropPending = false;
+        })
+        .catch(e => {
+          console.error(e);
+          this.staticBackdropPending = false;
         });
     },
     /*
@@ -1332,7 +1345,6 @@ export default {
      *@Date: 2021-03-17 22:48:11
      */
     joinOracleAndSetGoteRawStg(oracleData) {
-      // this.oracleId = parseInt(oracleData.OracleID);
       if (this.oracle_myStrategy == 0) {
         message.error("Please select strategy✌✊✋.", 2);
         return;
@@ -1377,7 +1389,6 @@ export default {
         for (let i = 0; i < this.LSCache.length; i++) {
           try {
             console.log("for index:", i);
-            // let _gotOid = (await NAPContract.getPastEvents('newOracleCreateAndHashStgSet', { filter: { stgHash: this.LSCache[i].EncryptedStg }, fromBlock: this.NAPDBN[this.netWork] }))[0].returnValues.OracleID;
             let _gotOid = (
               await this.NAPContract.getPastEvents("newOracleCreateAndHashStgSet", {
                 filter: { stgHash: this.LSCache[i].EncryptedStg },
@@ -1394,13 +1405,11 @@ export default {
               let stg = this.LSCache[i].stg;
               let bid = this.LSCache[i].bid;
               this.LSSent[oid] = { hsetp, stg, bid };
-              LocalData_Sent.save(this.LSSent);
+              LocalData_Sent.save(this.LSSent, this.LS_NetWork);
               ols = { hsetp, stg, bid };
-              // MissAgrs = 2// means missing and found back
               MissAgrs = false;
-              // cacheIndex = i;
               delete this.LSCache[i];
-              LocalData_Cache.save(this.LSCache);
+              LocalData_Cache.save(this.LSCache, this.LS_NetWork);
             }
           } catch (error) {
             console.log("Recover stg err:", error);
@@ -1418,32 +1427,42 @@ export default {
       let rst = await this.NAPContract.methods.makeAnneal(oid, ols.hsetp, ols.stg, ols.bid, _opponent).send({ from: this.addressNow });
       this.dt = rst;
       // 删除sent 策略释放空间
-      if (rst.events.OracleOver.type == "mined") {
+      if (rst.events.OracleOver.transactionHash) {
         delete this.LSSent[oid];
-        LocalData_Sent.save(this.LSSent);
+        LocalData_Sent.save(this.LSSent, this.LS_NetWork);
       }
       // 删除监听
       this.deleteSubscribeJoin(oid);
       this.staticBackdropPending = false;
       this.isPending = false;
-      this.oracleOverContent = "";
+      this.oracleOverContent = {};
       let evt = rst.events.OracleOver.returnValues;
       this.dt = evt;
       let _overTitle;
       let _overText;
+      let _result;
       if (evt.Winner.toLowerCase() == this.addressNow) {
-        _overTitle = `Annealed Oracle【#${oid}】`;
+        _overTitle = `#${oid}`;
+        _result = "😁: You Win🎉!";
         _overText = `【😁:You Win🎉!】. 【🏆:${this.web3js.utils.fromWei(String(evt.Prize), "ether")}$${this.coinName[this.netWork]}】.【(Init) Your Stg:${this.fingers[evt.Strategy_Init]}】.【GoteStg:${
           this.fingers[evt.Strategy_Gote]
         }】.【OraclePrice:${parseFloat(String((2 * evt.ValidBid) / evt.Prize)).toLocaleString()}$NAP/$${this.coinName[this.netWork]}】.【OverReason:${this.oracle_overReason[evt.Reason]}】`;
       } else {
-        _overTitle = `Annealed Oracle【#${oid}】`;
+        // _overTitle = `Annealed Oracle【#${oid}】`;
+        _overTitle = `#${oid}`;
+        _result = `Winner: ${evt.Winner}`;
         _overText = `【Winner:${evt.Winner}】. 【🏆:${this.web3js.utils.fromWei(String(evt.Prize), "ether")}$${this.coinName[this.netWork]}】.【(Init) Your Stg:${this.fingers[evt.Strategy_Init]}】.【GoteStg:${
           this.fingers[evt.Strategy_Gote]
         }】.【OraclePrice:${parseFloat(String((2 * evt.ValidBid) / evt.Prize)).toLocaleString()}$NAP/$${this.coinName[this.netWork]}】.【OverReason:${this.oracle_overReason[evt.Reason]}】`;
       }
       this.getMyCreateWaitAnneal();
-      this.oracleOverContent = _overTitle + _overText;
+      this.oracleOverContent.OracleID = _overTitle;
+      this.oracleOverContent.Result = _result;
+      this.oracleOverContent.Reward = `🏆: ${this.web3js.utils.fromWei(String(evt.Prize), "ether")}`;
+      this.oracleOverContent.Creator_strategy = `Creator_strategy: ${this.fingers[evt.Strategy_Init]}`;
+      this.oracleOverContent.Challenger_strategy = `Challenger_strategy: ${this.fingers[evt.Strategy_Gote]}`;
+      this.oracleOverContent.OraclePrice = `OraclePrice: ${parseFloat(String((2 * evt.ValidBid) / evt.Prize)).toLocaleString()}$NAP/$${this.coinName[this.netWork]}`;
+      // this.oracleOverContent = _overTitle + _overText;
       this.staticBackdropAnnealed = true;
     },
     // expired
@@ -1522,9 +1541,7 @@ export default {
         _startID = 1;
       }
       this.myLogs = [];
-      this.OracleDatas = [];
       let cacheOracleDatas = [];
-      this.updateToastAndShow(`${this.filterButtonText[1][0]} Refresh`, `Please wait, fetching ${this.filterButtonText[1][0]} datas …… ……`);
       await this.NAPContract.methods
         .getWaitJoinOracleIDsRL(_startID, _limit)
         .call({ from: this.addressNow })
@@ -1537,12 +1554,13 @@ export default {
                 rst2.OracleID = OracleIDRLs[0][i];
                 rst2.myUintInTheOracle = OracleIDRLs[1][i];
                 cacheOracleDatas.push(rst2);
+                console.log(rst2);
               });
           }
           this.updateToastAndShow(`${this.filterButtonText[1][0]}`, `Success: Oracle ID in range 【#${_startID}~#${Number(_startID) + Number(_limit) - 1}】——> Fetched ${this.filterButtonText[1][0]} datas.`);
         });
       // 可加入预言机
-      this.OracleDatas = cacheOracleDatas;
+      console.log("可加入预言机");
       this.myLogs = cacheOracleDatas;
     },
     getMyOracleIDsRLByState(_state, _myState, _startID, _limit) {
@@ -1550,8 +1568,6 @@ export default {
         _startID = 1;
       }
       this.myLogs = [];
-      this.OracleDatas = [];
-      this.updateToastAndShow(`${this.filterButtonText[_state][_myState]} Refresh`, `Please wait, fetching ${this.filterButtonText[_state][_myState]} datas …… ……`);
       this.NAPContract.methods
         .getMyOracleIDsRLByState(_state, _startID, _limit)
         .call({ from: this.addressNow })
@@ -1569,8 +1585,8 @@ export default {
                       rst2.OracleID = OracleIDRLs[0][i];
                       rst2.myUintInTheOracle = OracleIDRLs[1][i];
                       cacheOracleDatas.push(rst2);
-                      console.log("自己创建的（等待加入和等待退火的）");
-                      cacheOracleDatas.forEach(item => console.log(item));
+                      // console.log("自己创建的（等待加入和等待退火的）");
+                      // cacheOracleDatas.forEach(item => console.log(item));
                     }
                   });
               }
@@ -1590,14 +1606,14 @@ export default {
                       rst2.OracleID = OracleIDRLs[0][i];
                       rst2.myUintInTheOracle = OracleIDRLs[1][i];
                       cacheOracleDatas.push(rst2);
-                      console.log("别人创建自己加入");
-                      cacheOracleDatas.forEach(item => console.log(item));
+                      // console.log("别人创建自己加入");
+                      // cacheOracleDatas.forEach(item => console.log(item));
                     }
                   });
               }
             }
           }
-          this.OracleDatas = cacheOracleDatas;
+          console.log("我的预言机");
           this.myLogs = cacheOracleDatas;
           this.updateToastAndShow(
             `${this.filterButtonText[_state][_myState]}`,
@@ -1622,7 +1638,12 @@ export default {
         .on("error", console.error);
     },
     subscribeJoin(_oids) {
-      // if(_oids.length == 0) _oids = [0];
+      console.log("Listen_oids", _oids);
+      try {
+        if (_oids.length == 0) _oids = [0];
+      } catch (error) {
+        _oids = [0];
+      }
       console.log("_oids", _oids);
       this.NAPContract.events
         .GoteJoinedAndRawStgSet({ filter: { OracleID: _oids }, fromBlock: this.BlockNumber - 4900 }, function(error, event) {
@@ -1638,25 +1659,21 @@ export default {
             console.log(event, "error", error);
           }
         })
-        .on("data", function() {
-          // console.log('.on(data',event); // same results as the optional callback above
-        })
-        .on("changed", function() {
-          // remove event from local database
-        })
+        .on("data", function() {})
+        .on("changed", function() {})
         .on("error", console.error);
     },
     deleteSubscribeJoin(_oid) {
       try {
         this.LSWaitJoin.splice(this.LSWaitJoin.indexOf(parseInt(_oid)), 1);
-        LocalData_WaitJoin.save(this.LSWaitJoin);
+        LocalData_WaitJoin.save(this.LSWaitJoin, this.LS_NetWork);
       } catch (error) {
         console.log("#", _oid, ": delete listen wait join error, may not listening", error);
       }
     },
     cWaitJoin() {
       this.LSWaitJoin = [];
-      LocalData_WaitJoin.save(this.LSWaitJoin);
+      LocalData_WaitJoin.save(this.LSWaitJoin, this.LS_NetWork);
     },
     // init 方法
     getNetwork() {
@@ -1738,17 +1755,23 @@ export default {
       // this.NAPAddress = NAPAddress;
       this.NAPContract = new this.web3js.eth.Contract(NAP_MVP_API, this.NAPAddress);
       this.LPContract = new this.web3js.eth.Contract(NAP_MVP_API, this.LPAddress);
-      // document.body.removeChild(document.querySelector('#stars'))
       console.log(`NAPAddress@${this.netWork}`, this.NAPAddress);
       // 挂载好且网络检测好之后才读取ls
       this.LS_NetWork = this.netWork;
-      this.LSCache = LocalData_Cache.fetch();
-      this.LSSent = LocalData_Sent.fetch();
-      this.LSWaitJoin = LocalData_WaitJoin.fetch();
+      this.LSCache = LocalData_Cache.fetch(this.LS_NetWork);
+      this.LSSent = LocalData_Sent.fetch(this.LS_NetWork);
+      this.LSWaitJoin = LocalData_WaitJoin.fetch(this.LS_NetWork);
       console.log(`LSWaitJoin:${this.LSWaitJoin}`);
+      this.tokens.push(this.coinName[this.netWork]);
+      this.create_joinfee.unit = this.coinName[this.netWork];
       this.initUserData();
     },
     async initUserData() {
+      this.tabMode = 1;
+      this.activeKey = "1";
+      this.myLogs = [];
+      this.OracleLogs = [];
+      this.callback("1");
       await this.RefreshAccount();
       await this.intervalRefresh();
       await this.getJoinAbleOracles();
@@ -1812,6 +1835,13 @@ export default {
         this.getReCcd();
       }
     },
+    // sortLogs(logs) {
+    //   return logs.sort(function(a, b) {
+    //     console.log(`${a.OracleID} --- ${b.OracleID}`);
+    //     console.log(parseInt(a.OracleID) - parseInt(b.OracleID));
+    //     return parseInt(a.OracleID) - parseInt(b.OracleID) > 0;
+    //   });
+    // },
     /*
      *@Author: yozora
      *@Description: 产生随机数
@@ -1854,9 +1884,11 @@ export default {
       if (key === "1") {
         this.tabMode = 1;
         this.activeKey = "1";
+        this.callback("1");
       } else if (key === "2") {
         this.tabMode = 2;
         this.activeKey = "5";
+        this.callback("5");
       }
     },
     /*
@@ -1928,8 +1960,17 @@ export default {
       // 加密策略
       let EncryptedStg = this.encryption(hsetp, stg, bid);
 
+      // 存入并验证缓存
+      let cacheLengthBefore = this.LSCache.length;
       this.LSCache.push({ EncryptedStg, hsetp, stg, bid });
-      LocalData_Cache.save(this.LSCache);
+      LocalData_Cache.save(this.LSCache, this.LS_NetWork);
+      //等待写入
+      this.sleep(100);
+      if (!(this.LSCache.length > cacheLengthBefore)) {
+        // 写入失败提示
+        message.error("Write preImage cache error …… ……", 2);
+        return;
+      }
 
       // 弹出框
       this.staticBackdropPending = true;
@@ -1941,14 +1982,16 @@ export default {
         })
         .then(rst => {
           this.dt = rst;
-          console.log(`createOracle:${rst}`);
           let oid = parseInt(rst.events.newOracleCreateAndHashStgSet.returnValues.OracleID);
           // 记录发出的加密策略的原象
           this.LSSent[oid] = { hsetp, stg, bid };
-          LocalData_Sent.save(this.LSSent);
-          // 删除防止刷新丢失捕捉的加密策略原象
-          this.LSCache.pop();
-          LocalData_Cache.save(this.LSCache);
+          console.log(`LSSent:${this.LSSent}`);
+          LocalData_Sent.save(this.LSSent, this.LS_NetWork);
+          if (rst.events.newOracleCreateAndHashStgSet.transactionHash) {
+            // 删除防止刷新丢失捕捉的加密策略原象
+            this.LSCache.pop();
+            LocalData_Cache.save(this.LSCache, this.LS_NetWork);
+          }
           //获取创建后等待gote的列表展示：创建后→展示自己创建可以取消的
           (this.cfBtnNumber = 1) &
             (oid - 9 < 0 ? (this.oracle_filter_IdStart = 0) : (this.oracle_filter_IdStart = oid - 9)) &
@@ -1962,16 +2005,19 @@ export default {
           this.sleep(1000);
           // 记录等待加入的监听Oid
           this.LSWaitJoin.push(parseInt(oid));
-          LocalData_WaitJoin.save(this.LSWaitJoin);
+          LocalData_WaitJoin.save(this.LSWaitJoin, this.LS_NetWork);
           this.subscribeJoin(this.LSWaitJoin);
         })
         .catch(e => {
           console.log(e);
           if (e.code === 4001) {
             this.staticBackdropPending = false;
-            message.warning("你取消了支付", 2);
+            message.warning("你取消了创建预言机", 2);
           }
         });
+      // 定位到我的-等待加入
+      this.tabMode = 1;
+      this.activeKey = "2";
       this.confirmCreateOracle = false;
     },
     /*
@@ -1984,6 +2030,8 @@ export default {
       this.updateToastAndShow("Join Oracle", `Pending:【#${oid}】Oracle Joining  …… ……`);
       this.staticBackdropPending = true;
       this.staticBackdropJoinOracle = false;
+      console.log(this.web3js.utils.toWei(String(this.oracle_joing_bidFee)));
+      console.log(this.web3js.utils.toWei(String(this.oracle_join_joinfee)));
       this.NAPContract.methods
         .joinOracleAndSetGoteRawStg(oid, this.oracle_myStrategy, this.web3js.utils.toWei(String(this.oracle_joing_bidFee)))
         .send({
@@ -2015,66 +2063,67 @@ export default {
 </script>
 
 <style scoped>
-
-.bg-log{
-background: rgb(255,251,240);
+.bg-log {
+  background: rgb(255, 251, 240);
   /* background-color:#4CC8CA; */
   /* border:10px solid #4CC8CA; */
-	/* box-shadow:0 0 60px #245677;
+  /* box-shadow:0 0 60px #245677;
 	-moz-box-shadow:0 0 60px #245677;
 	-webkit-box-shadow:0 0 60px #245677; */
-  	box-shadow:0 0 60px #4CC8CA;
-	-moz-box-shadow:0 0 60px #4CC8CA;
-	-webkit-box-shadow:0 0 60px #4CC8CA;
+  box-shadow: 0 0 60px #4cc8ca;
+  -moz-box-shadow: 0 0 60px #4cc8ca;
+  -webkit-box-shadow: 0 0 60px #4cc8ca;
 }
 
-.bg-oracle{
-  background: rgb(255,251,240);
-    /* background-color:#CA99E8; */
+.bg-oracle {
+  background: rgb(255, 251, 240);
+  /* background-color:#CA99E8; */
   /* border:10px solid #CA99E8; */
-	/* box-shadow:0 0 60px #5946A3;
+  /* box-shadow:0 0 60px #5946A3;
 	-moz-box-shadow:0 0 60px #5946A3;
 	-webkit-box-shadow:0 0 60px #5946A3; */
-  	box-shadow:0 0 60px #CA99E8;
-	-moz-box-shadow:0 0 60px #CA99E8;
-	-webkit-box-shadow:0 0 60px #CA99E8;
+  box-shadow: 0 0 60px #ca99e8;
+  -moz-box-shadow: 0 0 60px #ca99e8;
+  -webkit-box-shadow: 0 0 60px #ca99e8;
 }
 
-.container >>> .ant-divider.ant-divider-horizontal{
-background-color: #5946a3;
+.container >>> .ant-divider.ant-divider-horizontal {
+  background-color: #5946a3;
 }
 
-.card-shadow >>> .ant-card.ant-card-small,.ant-card.ant-card-bordered,.ant-carousel{
+.card-shadow >>> .ant-card.ant-card-small,
+.ant-card.ant-card-bordered,
+.ant-carousel {
   border-radius: 1rem;
 }
 
-.neon:focus{
-  background-color:rgba(242, 242, 242, 1);
+.neon:focus {
+  background-color: rgba(242, 242, 242, 1);
 }
 
-.avatarIcon:hover{
-  background-color:rgba(242, 242, 242, 1);
+.avatarIcon:hover {
+  background-color: rgba(242, 242, 242, 1);
 }
 
 .strategy-icon {
-    float: left;
-    margin-top: -25px;
-    margin-left: 20px;
-    font-size: 24px;
-    padding-bottom: 2px;
-    background-color: #fff;
-    border-radius: 50px;
+  float: left;
+  margin-top: -25px;
+  margin-left: 20px;
+  font-size: 24px;
+  padding-bottom: 2px;
+  background-color: #fff;
+  border-radius: 50px;
 }
 
 .strategy-icon >>> .anticon {
   font-size: 32px;
   background-color: #fff;
-  padding:5px;
-  border: 2px solid  rgba(242, 242, 242, 1);
+  padding: 5px;
+  border: 2px solid rgba(242, 242, 242, 1);
   border-radius: 50px;
 }
 
-.control-input.ant-input-group-wrapper >>> input{
+.control-input.ant-input-group-wrapper >>> input {
   box-shadow: inset 2px 2px 5px #8f8787;
   background: rgba(242, 242, 242, 1);
   /* width: 50%; */
@@ -2090,14 +2139,14 @@ background-color: #5946a3;
   margin-right: 2em;
 }
 
-.strategy-block{
+.strategy-block {
   width: 70%;
   margin-top: 2em;
 }
 
-.strategy-input-bottom{
+.strategy-input-bottom {
   box-shadow: inset 2px 2px 5px #8f8787;
-  background: #fff);
+  background: #fff;
   width: 50%;
   float: right;
   margin-right: 2em;
@@ -2129,90 +2178,90 @@ background-color: #5946a3;
   margin-top: -3em;
 }
 
-.strategy-tabs >>> .ant-card.ant-card-bordered.ant-card-contain-grid.ant-card-small,.ant-card.ant-card-bordered.ant-card-small{
-    border-radius: 10px;
-    background-color: rgba(242, 242, 242, 1);
+.strategy-tabs >>> .ant-card.ant-card-bordered.ant-card-contain-grid.ant-card-small,
+.ant-card.ant-card-bordered.ant-card-small {
+  border-radius: 10px;
+  background-color: rgba(242, 242, 242, 1);
 }
 
-.strategy-tabs >>> .ant-card-grid.ant-card-grid-hoverable{
-    width: 70%;
-    text-align: center;
-    margin-top: 2em;
-    margin-left: 5em;
-    padding: 1em;
-    border-radius: 10px;
-    background-color: rgb(255, 255, 255)
+.strategy-tabs >>> .ant-card-grid.ant-card-grid-hoverable {
+  width: 70%;
+  text-align: center;
+  margin-top: 2em;
+  margin-left: 5em;
+  padding: 1em;
+  border-radius: 10px;
+  background-color: rgb(255, 255, 255);
 }
 
-.strategy-tabs >>> .ant-card-meta-detail{
-    margin-left: 5em;
-    margin-top: -1px;
+.strategy-tabs >>> .ant-card-meta-detail {
+  margin-left: 5em;
+  margin-top: -1px;
 }
 
 /* .strategy-tabs >>> .ant-tabs-tab.ant-tabs-tab-disabled{
   background-color:rgba(242, 242, 242, 1);
 } */
 
-.strategy-tabs >>> .ant-card-meta-avatar{
-    margin-right: 3.5em;
-    margin-top: -1px;
+.strategy-tabs >>> .ant-card-meta-avatar {
+  margin-right: 3.5em;
+  margin-top: -1px;
 }
 
-.strategy-tabs-icon{
-    padding: 1em 1em 1em 3em;
-    background-color: rgba(242, 242, 242, 1);
-    float: left;
-    margin-left: 2em;
-    border-radius: 10px;
+.strategy-tabs-icon {
+  padding: 1em 1em 1em 3em;
+  background-color: rgba(242, 242, 242, 1);
+  float: left;
+  margin-left: 2em;
+  border-radius: 10px;
 }
 
-.strategy-tabs-icon-you{
-    padding: 1em 1em 1em 3em;
-    background-color: rgba(242, 242, 242, 1);
-    float: left;
-    border-radius: 10px;
+.strategy-tabs-icon-you {
+  padding: 1em 1em 1em 3em;
+  background-color: rgba(242, 242, 242, 1);
+  float: left;
+  border-radius: 10px;
 }
 
-.strategy-tabs-div-left{
-    float: left;
-    margin-left: 5em;
+.strategy-tabs-div-left {
+  float: left;
+  margin-left: 5em;
 }
 
-.strategy-tabs-div-right{
-    float: right;
-    margin-right: 5em;
+.strategy-tabs-div-right {
+  float: right;
+  margin-right: 5em;
 }
 
-.log-icon{
+.log-icon {
   font-size: 16px;
   margin-right: 5px;
-  transform: translate(0px,-5px);
+  transform: translate(0px, -5px);
 }
-
 
 .neon {
-    color: #cce7f8;
-    font-size: 0.5rem;
-    font-family: 'Pacifico';
-    text-transform: uppercase;
+  color: #cce7f8;
+  font-size: 0.5rem;
+  font-family: "Pacifico";
+  text-transform: uppercase;
 }
 
-.bg-card.padding-box >>> .ant-divider.ant-divider-vertical{
-    height: 2em;
-    margin: 1em;
+.bg-card.padding-box >>> .ant-divider.ant-divider-vertical {
+  height: 2em;
+  margin: 1em;
 }
 
-.card-shadow{
-    /* box-shadow: 2px 2px 5px 5px #8f8787;
+.card-shadow {
+  /* box-shadow: 2px 2px 5px 5px #8f8787;
   border-radius: 10px; */
 }
 
-.card-body >>>  .ant-card-meta-avatar{
+.card-body >>> .ant-card-meta-avatar {
   float: right;
 }
 
-.card-body >>> .ant-tabs-bar.ant-tabs-top-bar{
-  text-align:left;
+.card-body >>> .ant-tabs-bar.ant-tabs-top-bar {
+  text-align: left;
 }
 
 .card-body >>> .ant-btn:focus {
@@ -2227,7 +2276,8 @@ background-color: #5946a3;
   overflow: hidden;
 }
 
-.ant-carousel >>> .slick-slide h3,.slick-slide h6 {
+.ant-carousel >>> .slick-slide h3,
+.slick-slide h6 {
   color: #fff;
 }
 </style>

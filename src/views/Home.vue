@@ -6,6 +6,10 @@
         <span>
           <span class="neon" onclick="location.reload();"> <img src="../assets/nash.png" />N✌A✊S✋H - #0</span>
         </span>
+        <div style="float: right;font-size: 24px;transform: translate(0px, -8px);margin-left: 0.5em;">
+          <a-icon title="En" type="global" v-if="language == 'zh'" @click="internationalization('en')" />
+          <a-icon title="中文" type="global" v-if="language == 'en'" @click="internationalization('zh')" />
+        </div>
         <span style="float: right">
           <div v-if="ethereumC == false" style="background-color: rgba(255, 51, 0, 0.3)" v-html="localize.header.ethwalletNotunLockOrInstall"></div>
           <div v-else>
@@ -14,32 +18,16 @@
               {{ localize.header.ethwalletLock }}
             </span>
             <span v-else>
-              <a type="button" class="btn neon" style="background-color: rgba(0, 255, 115, 0.3)" @click="() => $router.push('/nash')">
+              <a type="button" class="btn neon" style="background-color: rgba(0, 255, 115, 0.3);font-size: 12px" @click="() => $router.push('/nash')">
                 {{ localize.header.ethwalletunLock }}
               </a>
               <br />
-              <!-- <a
-                type="button"
-                class="btn"
-                style="background-color: rgba(0, 255, 115, 0.3)"
-                href="./oldplay.html"
-              >
-                点此继续使用无预言机被加入日志提醒的旧前端
-              </a> -->
             </span>
           </div>
-
-          <button v-if="language == 'zh'" class="dropdown-item btn" @click="internationalization('en')">
-            En
-          </button>
-          <button v-if="language == 'en'" class="dropdown-item btn" @click="internationalization('zh')">
-            中文
-          </button>
-          <div v-html="localize.welcome"></div>
+          <div style="margin-top: 1em;margin-right: -2.2em;" v-html="localize.welcome"></div>
         </span>
       </div>
     </div>
-    <!-- </header> -->
     <br />
     <div
       id="element"

@@ -58,7 +58,8 @@ export default {
       this.qiuyu = 0;
       if (this.onArr.length > 0) {
         this.endArr.push(this.onArr);
-        console.log(this.endArr, "this.endArr"); //这里是鼠标抬起的时候记录的坐标值
+        //这里是鼠标抬起的时候记录的坐标值
+        // console.log(this.endArr, "this.endArr"); 
         this.onArr = [];
       }
       this.$emit("drawSeed");
