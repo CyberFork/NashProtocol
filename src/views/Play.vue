@@ -13,7 +13,7 @@
               <div class="card-body">
                 <!-- 创建预言机卡片 -->
                 <!-- 散点图 -->
-                <Charts :historyLogs="historyLogs" style="height: 300px"></Charts>
+                <Charts :historyLogs="historyLogs" :chartTitle="chartTitle" style="height: 300px"></Charts>
                 <!-- 菜单tab -->
                 <div style="text-align: left">
                   <a-dropdown>
@@ -901,44 +901,44 @@ export default {
       /// oracle logs
       logsType: 0,
       historyLogs: [
-        [10.0, 8.04],
-        [8.07, 6.95],
-        [13.0, 7.58],
-        [9.05, 8.81],
-        [9.05, 8.8],
-        [9.05, 8.71],
-        [9.05, 8.7],
-        [9.05, 8.69],
-        [9.05, 8.68],
-        [9.05, 8.67],
-        [9.05, 8.66],
-        [9.05, 8.65],
-        [9.05, 8.64],
-        [9.05, 8.63],
-        [9.04, 8.62],
-        [9.03, 8.62],
-        [9.02, 8.62],
-        [9.01, 8.62],
-        [9.0, 8.62],
-        [9.06, 8.62],
-        [11.0, 8.33],
-        [14.0, 7.66],
-        [13.4, 6.81],
-        [10.0, 6.33],
-        [14.0, 8.96],
-        [12.5, 6.82],
-        [9.15, 7.2],
-        [11.5, 7.2],
-        [3.03, 4.23],
-        [12.2, 7.83],
-        [2.02, 4.47],
-        [1.05, 3.33],
-        [4.05, 4.96],
-        [6.03, 7.24],
-        [12.0, 6.26],
-        [12.0, 8.84],
-        [7.08, 5.82],
-        [5.02, 5.68],
+        [0, 8.04],
+        [1, 6.95],
+        [2, 7.58],
+        [6, 8.81],
+        [8, 8.8],
+        [10, 8.71],
+        [10, 8.7],
+        [10, 8.69],
+        [10, 8.68],
+        [10, 8.67],
+        [10, 8.66],
+        [10, 8.65],
+        [10, 8.64],
+        [10, 8.63],
+        [12, 8.62],
+        [12, 8.62],
+        [13, 8.62],
+        [14, 8.62],
+        [14, 8.62],
+        [15, 8.62],
+        [15, 8.33],
+        [16, 7.66],
+        [16, 6.81],
+        [18, 6.33],
+        [18, 8.96],
+        [19, 6.82],
+        [19, 7.2],
+        [20, 7.2],
+        [20, 4.23],
+        [21, 7.83],
+        [21, 4.47],
+        [22, 3.33],
+        [22, 4.96],
+        [23, 7.24],
+        [23, 6.26],
+        [0, 8.84],
+        [0, 5.82],
+        [18, 5.68],
       ],
       myLogs: [],
       /// dialogs
@@ -962,6 +962,7 @@ export default {
       staticBackdropCreateOracle: true,
       staticBackdropJoinOracle: false,
       diceStyle: { "font-size": "24px" },
+      chartTitle: [],
       // create data new
       tokens: [],
       // 创建数据
@@ -1765,6 +1766,7 @@ export default {
       this.tokens.push(this.coinName[this.netWork]);
       this.create_joinfee.unit = this.coinName[this.netWork];
       this.initUserData();
+      this.chartTitle.push(`{a|0.023 }{b|${this.coinName[this.netWork]} / }{x|NAP}`);
     },
     async initUserData() {
       this.tabMode = 1;

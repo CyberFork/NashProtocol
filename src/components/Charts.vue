@@ -13,12 +13,16 @@ export default {
       type: Array,
       default: [],
     },
+    chartTitle: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
       options: {
         title: {
-          text: ["{a|0.023 }{b|BNB / }{x|NAP}"],
+          text: this.chartTitle,
           subtext: "$ 2.2 (+5%)过去24小时 数据来源于本站",
           lineHeight: 56,
           textStyle: {
@@ -92,6 +96,8 @@ export default {
         xAxis: [
           {
             show: true,
+            type: "category",
+            // data: ["0", "3", "6", "9", "12", "15", "18", "21", "24"],
             axisTick: {
               alignWithLabel: true,
             },
@@ -115,8 +121,8 @@ export default {
             type: "scatter",
             itemStyle: {
               color: "rgb(202, 153, 232)",
-              shadowColor: 'rgb(202, 153, 232)',
-              shadowBlur: 10
+              shadowColor: "rgb(202, 153, 232)",
+              shadowBlur: 10,
             },
           },
         ],
@@ -128,6 +134,9 @@ export default {
     options(val) {
       this.chart.setOption(val);
     },
+    // chartTitle() {
+    //   this.chart.setOption(this.options);
+    // },
   },
   methods: {
     resize() {
