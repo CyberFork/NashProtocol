@@ -549,11 +549,12 @@
                     <div style="width: 95%;margin:auto">
                       <p style="text-align: left;margin-left: 10px;">仲裁等待时长</p>
                       <p style="text-align: left;margin-left: 10px;">
-                        在等待时长结束前未完成仲裁，则您会被自动判负仲裁速度越快，越容易获得注意
+                        在等待时长结束前未完成仲裁，则您会被自动判负
                       </p>
+                      <p style="text-align: left;margin-left: 10px;">仲裁速度越快，越容易获得注意</p>
                       <br />
-                      <a-input placeholder="区块个数(默认1000)" class="control-input" type="text" v-model="oracle_create_waitblocks">
-                        <span slot="addonAfter">约15分钟</span>
+                      <a-input placeholder="区块个数(默认4000)" class="control-input" type="text" v-model="oracle_create_waitblocks">
+                        <span slot="addonAfter">约{{ oracle_create_waitTime }}分钟</span>
                       </a-input>
                     </div>
                     <br />
@@ -860,6 +861,7 @@ export default {
       oracle_filter_waitblocks: "",
       oracle_filter_IdStart: LocalData.fetch()[0] == undefined ? 1 : LocalData.fetch()[0],
       oracle_create_joinfee: "",
+      oracle_create_waitTime: "",
       oracle_create_waitblocks: "",
       oracle_create_rawEntropy: "",
       oracle_create_bidFee: "",
@@ -990,6 +992,16 @@ export default {
         LocalData.save(this.LSD);
       },
       deep: true,
+    },
+    oracle_create_waitblocks: {
+      handler: function(oracle_create_waitblocks) {
+        if (this.netWork === "Kovan") {
+          this.oracle_create_waitTime = Math.round((oracle_create_waitblocks * 8) / 60);
+        }
+        if (this.netWork === "BSC") {
+          this.oracle_create_waitTime = Math.round((oracle_create_waitblocks * 3) / 60);
+        }
+      },
     },
   },
   created() {
@@ -1767,6 +1779,7 @@ export default {
       this.create_joinfee.unit = this.coinName[this.netWork];
       this.initUserData();
       this.chartTitle.push(`{a|0.023 }{b|${this.coinName[this.netWork]} / }{x|NAP}`);
+      this.oracle_create_waitblocks = 4000;
     },
     async initUserData() {
       this.tabMode = 1;
@@ -2020,6 +2033,7 @@ export default {
       // 定位到我的-等待加入
       this.tabMode = 1;
       this.activeKey = "2";
+      this.createOracleStep = 1;
       this.confirmCreateOracle = false;
     },
     /*
