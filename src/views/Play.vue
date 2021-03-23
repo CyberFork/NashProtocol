@@ -6,7 +6,7 @@
     <div v-if="NAPContract == undefined"></div>
     <div v-else>
       <div class="row">
-        <div class="col-8" style="min-width: 13rem;">
+        <div class="col-8" style="min-width: 13rem;margin:auto">
           <aside>
             <div class="card bg-log">
               <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
@@ -441,7 +441,7 @@
         </div>
         <!-- *********************************预言机面板及广告位*********************************** -->
         <!-- 预言机面板 -->
-        <div class="col-4" style="min-width: 23rem;">
+        <div class="col-4" style="min-width: 14rem;margin:auto">
           <div class="container">
             <div class="card bg-oracle" style="min-height: 20rem;overflow: auto;">
               <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
@@ -1929,7 +1929,8 @@ export default {
           </div>
         ),
         style: {
-          width: "420px",
+          "min-width": "auto",
+          // width: "420px",
           position: "absolute",
           right: "1rem",
         },
@@ -2206,7 +2207,8 @@ export default {
   width: 70%;
   text-align: center;
   margin-top: 2em;
-  margin-left: 5em;
+  /* flexible */
+  margin-left: 2em;
   padding: 1em;
   border-radius: 10px;
   background-color: rgb(255, 255, 255);

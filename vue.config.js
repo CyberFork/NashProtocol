@@ -30,13 +30,13 @@ module.exports = {
         // 这里的选项会传递给 css-loader
         javascriptEnabled: true,
       },
-      // postcss: {
-      //   plugins: [
-      //     require("postcss-px2rem")({
-      //       remUnit: 37.5,
-      //     }),
-      //   ],
-      // },
+      postcss: {
+        plugins: [
+          require("postcss-px2rem")({
+            remUnit: 37.5,
+          }),
+        ],
+      },
     },
   },
   configureWebpack: {
