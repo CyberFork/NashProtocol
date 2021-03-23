@@ -42,7 +42,7 @@
                     <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '1'">
                       <a-list-item slot="renderItem" slot-scope="oracleData, index">
                         <!-- 可加入的卡片 -->
-                        <a-card size="small" v-show="joiningOracleID !== oracleData.OracleID">
+                        <a-card size="small" v-show="joiningOracleID !== oracleData.OracleID" style="height:26em">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
                               <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
@@ -67,7 +67,7 @@
                             <div class="strategy-tabs-icon"><a-icon type="loading" :style="{ transform: 'translate(-100%, -30%)' }" /></div>
                             <span>等待加入...</span>
                           </a-card-grid>
-                          <a-divider style="opacity:0"></a-divider>
+                          <a-divider style="opacity:0;margin:22px 0"></a-divider>
                           <div class="strategy-tabs-div-left">
                             <a-icon type="block" class="log-icon" /><span>{{ oracleData.markBlock }}</span>
                           </div>
@@ -80,7 +80,7 @@
                           </div>
                         </a-card>
                         <!-- 可加入的卡片步骤二 -->
-                        <a-card size="small" v-show="joiningOracleID === oracleData.OracleID">
+                        <a-card size="small" v-show="joiningOracleID === oracleData.OracleID" style="height:26em">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
                               <a-icon type="arrow-left" class="log-icon" @click="joiningOracleID = ''" />
@@ -114,7 +114,7 @@
                               </a-button>
                             </div>
                             <!-- <a-divider style="opacity:0"></a-divider> -->
-                            <small style="text-align: center;display: block;margin: 15px 0;">
+                            <small style="text-align: center;display: block;margin: 5px 0">
                               【{{ oracle_joing_bidFee / (web3js.utils.fromWei(String(oracleData.joinFee), "ether") * 0.95) }} $NAP/${{ coinName[netWork] }}】
                             </small>
                             <div><a-button style="width: 100%;" type="primary" @click="joinOracleAndSetGoteRawStg(oracleData)">提交报价</a-button></div>
@@ -2196,6 +2196,11 @@ export default {
   margin-top: -3em;
 }
 
+.strategy-tabs >>> .ant-card-meta-detail {
+  margin-left: 5em;
+  margin-top: -1px;
+}
+
 .strategy-tabs >>> .ant-card.ant-card-bordered.ant-card-contain-grid.ant-card-small,
 .ant-card.ant-card-bordered.ant-card-small {
   border-radius: 10px;
@@ -2212,9 +2217,13 @@ export default {
   background-color: rgb(255, 255, 255);
 }
 
-.strategy-tabs >>> .ant-card-meta-detail {
-  margin-left: 5em;
-  margin-top: -1px;
+.strategy-tabs >>> .ant-divider-horizontal {
+  display: block;
+  clear: both;
+  width: 100%;
+  min-width: 100%;
+  height: 1px;
+  margin: 21px 0;
 }
 
 /* .strategy-tabs >>> .ant-tabs-tab.ant-tabs-tab-disabled{
