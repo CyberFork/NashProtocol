@@ -680,9 +680,6 @@
             <h5 v-if="isPending" class="modal-title" id="staticBackdropLabel">
               Do not refuse! If you sent the transaction.
             </h5>
-            <button v-if="!isPending" type="button" class="close" @click="closePending">
-              <span aria-hidden="true">&times;</span>
-            </button>
           </div>
           <div class="modal-body" style="text-align: center;">
             <div class="spinner-border text-success" role="status">
