@@ -1029,7 +1029,6 @@ export default {
       this.timeNow = myDate.toLocaleDateString() + "-" + myDate.toLocaleTimeString();
       this.toastTitle = title;
       this.toastContent = content;
-      // console.log("通知卡弹出");
       this.openNotification();
     },
     /*
@@ -1786,7 +1785,7 @@ export default {
       this.callback("1");
       await this.RefreshAccount();
       await this.intervalRefresh();
-      await this.getJoinAbleOracles();
+      // await this.getJoinAbleOracles();
       await this.subscribeJoin(this.LSWaitJoin);
     },
     sleep(time) {

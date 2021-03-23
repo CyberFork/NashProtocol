@@ -27,14 +27,16 @@ module.exports = {
   css: {
     loaderOptions: {
       less: {
-        // 定制主题
-        modifyVars: {
-          "select-border-color": "gray",
-          "border-radius-base": "2px",
-        },
         // 这里的选项会传递给 css-loader
         javascriptEnabled: true,
       },
+      // postcss: {
+      //   plugins: [
+      //     require("postcss-px2rem")({
+      //       remUnit: 37.5,
+      //     }),
+      //   ],
+      // },
     },
   },
   configureWebpack: {
