@@ -2,7 +2,7 @@ import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-// import "lib-flexible";
+import "lib-flexible";
 import { Breadcrumb, Carousel, Dropdown, Divider, Layout, Button, Select, Result, Badge, Icon, Input, Tabs, Card, Modal, Menu, List, Tag } from "ant-design-vue";
 import "./style/index.css";
 
