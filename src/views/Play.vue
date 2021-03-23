@@ -11,7 +11,6 @@
             <div class="card bg-log">
               <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
               <div class="card-body">
-                <!-- 创建预言机卡片 -->
                 <!-- 散点图 -->
                 <Charts :historyLogs="historyLogs" :chartTitle="chartTitle" style="height: 300px"></Charts>
                 <!-- 菜单tab -->
@@ -448,8 +447,8 @@
               <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
               <div class="card-body">
                 <!-- 创建预言机面板一 -->
-                <div class="card-shadow" style="display:inline-block;width: 100%;">
-                  <a-card :bordered="false" size="small" v-show="createOracleStep === 1 && cardMode === 1">
+                <div class="card-shadow flipper" style="display:inline-block;width: 100%;">
+                  <a-card class="re-item-front" :bordered="false" size="small" v-show="cardMode === 1">
                     <a-card-meta style="text-align:left;font-weight: bold">
                       <template slot="title">
                         <span>创建预言机</span>
@@ -507,11 +506,9 @@
                     </small>
                   </a-card>
                   <!-- 创建预言机面板二 -->
-                  <a-card :bordered="false" size="small" v-show="createOracleStep === 2 && cardMode === 1">
+                  <a-card class="re-item-back" :bordered="false" size="small" v-show="cardMode === 1">
                     <a-card-meta style="text-align:left;font-weight: bold">
-                      <template slot="title">
-                        <span>随机数祈福</span>
-                      </template>
+                      <template slot="title"> <a-icon style="transform: translate(0px, -3px);margin-right:20px" type="arrow-left" class="log-icon" @click="flipCard" /><span>随机数祈福</span> </template>
                       <template slot="avatar">
                         <icon-font class="avatarIcon" @click="cardMode = 2" type="icon-xueshimao" style="font-size: 24px;margin-right: 5px;"></icon-font>
                         <a-icon class="avatarIcon" @click="cardMode = 3" type="control" style="font-size: 24px" :rotate="90" />
@@ -1300,6 +1297,9 @@ export default {
         return;
       }
       this.createOracleStep = 2;
+      // 卡片翻转
+      document.getElementsByClassName("re-item-front")[0].classList.toggle("flip");
+      document.getElementsByClassName("re-item-back")[0].classList.toggle("flip");
     },
     /*
      *@Author: yozora
@@ -1887,6 +1887,10 @@ export default {
     closeAnnealed() {
       this.staticBackdropAnnealed = false;
     },
+    flipCard() {
+      document.getElementsByClassName("re-item-front")[0].classList.remove("flip");
+      document.getElementsByClassName("re-item-back")[0].classList.remove("flip");
+    },
     /*
      *@Author: yozora
      *@Description: 切换tabs菜单
@@ -2030,6 +2034,8 @@ export default {
       // 定位到我的-等待加入
       this.tabMode = 1;
       this.activeKey = "2";
+      document.getElementsByClassName("re-item-front")[0].classList.remove("flip");
+      document.getElementsByClassName("re-item-back")[0].classList.remove("flip");
       this.createOracleStep = 1;
       this.confirmCreateOracle = false;
     },
@@ -2292,5 +2298,33 @@ export default {
 .ant-carousel >>> .slick-slide h3,
 .slick-slide h6 {
   color: #fff;
+}
+
+.card-shadow .re-item-front.flip {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+
+.card-shadow .re-item-back.flip {
+  transform: rotateY(0deg);
+  -webkit-transform: rotateY(0deg);
+}
+
+.flipper {
+  transition: 1.2s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.re-item-front,
+.re-item-back {
+  position: absolute;
+  backface-visibility: hidden;
+}
+
+.re-item-back {
+  position: relative;
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
 }
 </style>
