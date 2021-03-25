@@ -6,7 +6,7 @@
     <div v-if="NAPContract == undefined"></div>
     <div v-else>
       <div class="row">
-        <div class="col-8" style="min-width: 13rem;">
+        <div class="col-8 left-card" style="min-width: 13rem;">
           <aside>
             <div class="card bg-log">
               <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
@@ -39,10 +39,10 @@
                   </a-tab-pane>
                   <!-- 可加入的 -->
                   <a-tab-pane v-if="tabMode === 1" key="1" tab="可加入的">
-                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '1'">
+                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '1'" class="canJoinCard">
                       <a-list-item slot="renderItem" slot-scope="oracleData, index">
                         <!-- 可加入的卡片 -->
-                        <a-card size="small" v-show="joiningOracleID !== oracleData.OracleID" style="height:26em">
+                        <a-card size="small" class="canJoinCard-card" v-show="joiningOracleID !== oracleData.OracleID" style="height:26em">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
                               <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
@@ -80,7 +80,7 @@
                           </div>
                         </a-card>
                         <!-- 可加入的卡片步骤二 -->
-                        <a-card size="small" v-show="joiningOracleID === oracleData.OracleID" style="height:26em">
+                        <a-card size="small" class="canJoinCard-card" v-show="joiningOracleID === oracleData.OracleID" style="height:26em">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
                               <a-icon type="arrow-left" class="log-icon" @click="joiningOracleID = ''" />
@@ -132,10 +132,10 @@
                   </a-tab-pane>
                   <!-- 等待加入 -->
                   <a-tab-pane v-if="tabMode === 1" key="2" tab="等待加入" force-render>
-                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '2'">
+                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '2'" class="canJoinCard">
                       <a-list-item slot="renderItem" slot-scope="oracleData, index">
                         <!-- 等待加入卡片 -->
-                        <a-card size="small">
+                        <a-card size="small" >
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
                               <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
@@ -178,7 +178,7 @@
                   </a-tab-pane>
                   <!-- 等待仲裁 -->
                   <a-tab-pane v-if="tabMode === 1" key="3" tab="等待仲裁">
-                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '3'">
+                    <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '3'" class="canJoinCard">
                       <a-list-item slot="renderItem" slot-scope="oracleData, index">
                         <!-- 等待仲裁卡片 -->
                         <a-card size="small">
@@ -441,13 +441,13 @@
         </div>
         <!-- *********************************预言机面板及广告位*********************************** -->
         <!-- 预言机面板 -->
-        <div class="col-4" style="min-width: 23rem;">
+        <div class="col-4 right-card" style="min-width: 23rem;">
           <div class="container">
             <div class="card bg-oracle" style="min-height: 20rem;overflow: auto;">
               <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
               <div class="card-body">
                 <!-- 创建预言机面板一 -->
-                <div class="card-shadow flipper" style="display:inline-block;width: 100%;">
+                <div class="card-shadow flipper" style="display:inline-block;width: 100%;display:flex;justify-content: center;">
                   <a-card class="re-item-front" :bordered="false" size="small" v-show="cardMode === 1">
                     <a-card-meta style="text-align:left;font-weight: bold">
                       <template slot="title">
@@ -653,10 +653,10 @@
                 <div class="card-shadow" style="display:inline-block;width: 100%;">
                   <a-carousel effect="fade" autoplay :dots="false">
                     <div>
-                      <span class="neon"><img style="float: left;margin: 40px -20px 0 40px;" src="../assets/nash.png" /><span>NASH Protocol 全球首家博弈报价预言机</span></span>
+                      <span class="neon"><img class="neon1" style="float: left;margin: 40px -20px 0 40px;" src="../assets/nash.png" /><span>NASH Protocol 全球首家博弈报价预言机</span></span>
                     </div>
                     <div>
-                      <span class="neon"><img style="float: left;margin: 65px -60px 0px 100px;" src="../assets/loop_mini.png" /><span>LOOP 未来的信任网络</span></span>
+                      <span class="neon"><img class="neon2" style="float: left;margin: 65px -60px 0px 100px;" src="../assets/loop_mini.png" /><span>LOOP 未来的信任网络</span></span>
                     </div>
                   </a-carousel>
                 </div>
@@ -1914,6 +1914,7 @@ export default {
     openNotification() {
       const key = `open${Date.now()}`;
       notification.open({
+      duration:200,
         message: h => (
           <div class="toast-header">
             <img src={require("../assets/nash.png")} class="rounded mr-2" alt="NASH icon" style="width: 1rem;height: 1rem;" />
@@ -2334,5 +2335,49 @@ export default {
   position: relative;
   transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
+}
+@media screen and (max-width: 1174px) {
+
+  .bg-content {
+    padding: 0px !important;
+  }
+  .ant-layout-content {
+    padding: 0px 5px !important;
+  }
+  
+  .right-card {
+      max-width: 100%;
+      min-width: 100% !important;
+  }
+
+  .right-card .container {
+    padding-right: 0px;
+    padding-left: 0px;
+  }
+
+  .left-card {
+      max-width: 100%;
+      min-width: 100% !important;
+      margin-bottom: 10px
+  }
+
+  .neon1 {
+    margin: 40px -20px 0px 3px !important;
+  }
+
+  .neon2 {
+    margin: 65px -60px 0px 27px !important;
+  }
+
+  .canJoinCard-card {
+    height: auto !important; 
+  }
+
+  .ant-card-grid.ant-card-grid-hoverable {
+    margin-left: 50% !important;
+    transform: translate(-50%,0);
+    width: 80% !important;
+  }
+
 }
 </style>

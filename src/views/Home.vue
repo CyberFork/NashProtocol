@@ -102,7 +102,7 @@ export default {
             lnsPage: "环域名",
             graphPage: "图表",
           },
-          welcome: '<a class="btn btn-danger btn-sm" target="_blank" style="float: right;" href="https://www.yuque.com/books/share/f2a34eb8-6ab2-418a-9a04-7a275af66a4c?#" role="button">Learn More🚀</a>',
+          welcome: '<a class="btn btn-danger btn-sm learn-more" target="_blank" style="float: right;" href="https://www.yuque.com/books/share/f2a34eb8-6ab2-418a-9a04-7a275af66a4c?#" role="button">Learn More🚀</a>',
         },
         en: {
           header: {
@@ -125,7 +125,7 @@ export default {
             lnsPage: "LNS",
             graphPage: "Graph",
           },
-          welcome: '<a class="btn btn-danger btn-sm" target="_blank" style="float: right;" href="https://www.yuque.com/books/share/f2a34eb8-6ab2-418a-9a04-7a275af66a4c?#" role="button">Learn More🚀</a>',
+          welcome: '<a class="btn btn-danger btn-sm learn-more" target="_blank" style="float: right;" href="https://www.yuque.com/books/share/f2a34eb8-6ab2-418a-9a04-7a275af66a4c?#" role="button">Learn More🚀</a>',
         },
       },
       language: "zh",

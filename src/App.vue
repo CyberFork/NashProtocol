@@ -45,4 +45,59 @@ body,
     }
   }
 }
+
+@media screen and (max-width: 1174px) {
+
+  .bg-content {
+    padding: 0px !important;
+  }
+  .ant-layout-content {
+    padding: 0px 5px !important;
+  }
+  .ant-layout-header {
+    padding: 0px
+  }
+
+  #app {
+    margin-top: -6px;
+  }
+
+  .ant-layout-header {
+    height: 80px;
+    background: #c3c3c3;
+  }
+
+  .d_addressNow {
+    line-height: 35px;
+    margin-top: 0px !important;
+    margin-right: 10px !important;
+  }
+  
+  .d_network {
+    line-height: 35px;
+    margin-top: 0px !important;
+  }
+  .learn-more {
+    float: left !important;
+  }
+
+  .ant-notification {
+    width: 300px !important;
+    max-width: calc(100vw) !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: auto !important;
+  }
+
+  .ant-notification-notice {
+    width: 100% !important;
+    right: 0rem !important;
+    left: 50%; 
+    transform: translate(-50%,0%);
+  }
+
+  .canJoinCard .ant-col-12{
+    width: 100% !important;
+  }
+}
 </style>

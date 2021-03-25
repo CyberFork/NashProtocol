@@ -45,9 +45,9 @@ export default {
           show: true,
           containLabel: false,
           backgroundColor: "rgba(242, 242, 242, 1)",
-          x: 80,
+          x: 30,
           y: 60,
-          x2: 80,
+          x2: 30,
           y2: 60,
         },
         tooltip: {
