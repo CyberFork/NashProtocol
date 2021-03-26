@@ -519,7 +519,7 @@
                     <div class="bg-card padding-box-bg">
                       <div style="background-color:#fff">
                         <icon-font type="icon-qifupai" style="font-size:32px" />祈福种子
-                        <my-canvas @drawSeed="randomNum"></my-canvas>
+                        <my-canvas style="width:100%;height:300px" @drawSeed="randomNum"></my-canvas>
                       </div>
                       <a-divider style="margin:12px 0;"></a-divider>
                       <!-- 种子区 -->
@@ -624,7 +624,7 @@
               </div>
               <!-- <a-divider></a-divider> -->
               <!-- 报价奖励 -->
-              <div class="card-body">
+              <div class="card-body" style="margin-top:130px">
                 <div class="card-shadow" style="display:inline-block;width: 100%;">
                   <a-card>
                     <a-card-meta style="text-align:left;font-weight: bold">
@@ -2395,6 +2395,10 @@ export default {
 
   .logCard {
     width: 100%;
+  }
+
+  .re-item-back {
+    width: 100%
   }
 }
 </style>
