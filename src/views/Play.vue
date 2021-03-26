@@ -29,7 +29,7 @@
                     </a-menu>
                   </a-dropdown>
                 </div>
-                <a-tabs :activeKey="activeKey" @change="callback" class="strategy-tabs" animated>
+                <a-tabs :activeKey="activeKey" @change="callback" class="strategy-tabs" size="large" animated>
                   <!-- 大厅 -->
                   <a-tab-pane v-if="tabMode === 1" key="0" disabled>
                     <a-tag slot="tab" color="purple">
@@ -135,7 +135,7 @@
                     <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '2'" class="canJoinCard">
                       <a-list-item slot="renderItem" slot-scope="oracleData, index">
                         <!-- 等待加入卡片 -->
-                        <a-card size="small" >
+                        <a-card size="small">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
                               <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
@@ -1914,7 +1914,7 @@ export default {
     openNotification() {
       const key = `open${Date.now()}`;
       notification.open({
-      duration:200,
+        duration: 200,
         message: h => (
           <div class="toast-header">
             <img src={require("../assets/nash.png")} class="rounded mr-2" alt="NASH icon" style="width: 1rem;height: 1rem;" />
@@ -2202,6 +2202,14 @@ export default {
   margin-top: -1px;
 }
 
+.strategy-tabs >>> .ant-tabs-tab-next.ant-tabs-tab-arrow-show,
+.strategy-tabs >>> .ant-tabs-tab-prev.ant-tabs-tab-arrow-show {
+  color: purple;
+  font-family: "Pacifico";
+  text-transform: uppercase;
+  animation: shining 0.2s alternate infinite;
+}
+
 .strategy-tabs >>> .ant-card.ant-card-bordered.ant-card-contain-grid.ant-card-small,
 .ant-card.ant-card-bordered.ant-card-small {
   border-radius: 10px;
@@ -2226,10 +2234,6 @@ export default {
   height: 1px;
   margin: 21px 0;
 }
-
-/* .strategy-tabs >>> .ant-tabs-tab.ant-tabs-tab-disabled{
-  background-color:rgba(242, 242, 242, 1);
-} */
 
 .strategy-tabs >>> .ant-card-meta-avatar {
   margin-right: 3.5em;
@@ -2277,11 +2281,6 @@ export default {
 .bg-card.padding-box >>> .ant-divider.ant-divider-vertical {
   height: 2em;
   margin: 1em;
-}
-
-.card-shadow {
-  /* box-shadow: 2px 2px 5px 5px #8f8787;
-  border-radius: 10px; */
 }
 
 .card-body >>> .ant-card-meta-avatar {
@@ -2336,18 +2335,33 @@ export default {
   transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
 }
-@media screen and (max-width: 1174px) {
 
+@keyframes shining {
+  from {
+    text-shadow: 0 0 6px rgba(182, 211, 207, 0.9), 0 0 30px rgba(182, 211, 207, 0.3), 0 0 12px rgba(15, 115, 223, 0.5), 0 0 21px rgba(15, 115, 223, 0.9), 0 0 34px rgba(15, 115, 223, 0.8),
+      0 0 54px rgba(15, 115, 223, 0.9);
+  }
+  to {
+    text-shadow: 0 0 6px rgba(182, 211, 207, 1), 0 0 30px rgba(182, 211, 207, 0.4), 0 0 12px rgba(15, 115, 223, 0.6), 0 0 22px rgba(15, 115, 223, 0.8), 0 0 38px rgba(15, 115, 223, 0.9),
+      0 0 60px rgba(15, 115, 223, 1);
+  }
+}
+
+@media screen and (max-width: 1174px) {
+  .row {
+    margin-right: 0px;
+    margin-left: 0px;
+  }
   .bg-content {
     padding: 0px !important;
   }
   .ant-layout-content {
     padding: 0px 5px !important;
   }
-  
+
   .right-card {
-      max-width: 100%;
-      min-width: 100% !important;
+    max-width: 100%;
+    min-width: 100% !important;
   }
 
   .right-card .container {
@@ -2356,9 +2370,9 @@ export default {
   }
 
   .left-card {
-      max-width: 100%;
-      min-width: 100% !important;
-      margin-bottom: 10px
+    max-width: 100%;
+    min-width: 100% !important;
+    margin-bottom: 10px;
   }
 
   .neon1 {
@@ -2370,14 +2384,17 @@ export default {
   }
 
   .canJoinCard-card {
-    height: auto !important; 
+    height: auto !important;
   }
 
   .ant-card-grid.ant-card-grid-hoverable {
     margin-left: 50% !important;
-    transform: translate(-50%,0);
+    transform: translate(-50%, 0);
     width: 80% !important;
   }
 
+  .logCard {
+    width: 100%;
+  }
 }
 </style>
