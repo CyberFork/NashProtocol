@@ -82,14 +82,13 @@ export default {
 　　}
 ,
     down(event) {
-      console.log('down',event)
       if (this.hua == true) {
         this.onoff = false;
       } else {
         this.onoff = true;
 
         let x = event.pageX
-        let y = event.pageX
+        let y = event.pageY
         // 切换模式
         if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent) && event.targetTouches && event.targetTouches[0]) {
           const {pageX,pageY} = event.targetTouches[0]
@@ -100,7 +99,6 @@ export default {
         this.oldx =  x - this.getElementLeft(this.canvas)
         this.oldy = y -  this.getElementTop(this.canvas)
         
-        console.log(x,y,this.getElementLeft(this.canvas),this.getElementTop(this.canvas))
       }
     },
     
@@ -117,23 +115,23 @@ export default {
       this.ctx.clearRect(0, 0, this.canvas.height, this.canvas.height);
     },
     draw(event) {
-      
+try {
       if (this.onoff == true) {
         if (this.qiuyu % 6 == 0) {
-        let x = event.pageX
-        let y = event.pageX
-        console.log('draw',x,y)
-        // 切换模式
-        if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent) && event.targetTouches && event.targetTouches[0]) {
-          const {pageX,pageY} = event.targetTouches[0]
-          x = pageX;
-           y = pageY
-        }
+          let x = event.pageX
+          let y = event.pageY
+          // 切换模式
+          if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent) && event.targetTouches && event.targetTouches[0]) {
+            const {pageX,pageY} = event.targetTouches[0]
+            x = pageX;
+            y = pageY;
+          }
+        
           //此处取余的目的是获取的坐标不是那么多
           var newx = x - this.getElementLeft(this.canvas)
           //getBoundingClientRect方法是边框距离浏览器的距离
           var newy = y -  this.getElementTop(this.canvas)
-          // console.log(newx,newy,'000')
+
           this.ctx.beginPath();
           this.ctx.moveTo(this.oldx, this.oldy);
           this.ctx.lineTo(newx, newy);
@@ -153,6 +151,10 @@ export default {
         }
         this.qiuyu++;
       }
+}catch (e){
+  console.log(e)
+}
+
     },
   },
 };
