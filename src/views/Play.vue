@@ -17,9 +17,7 @@
                 <div style="text-align: left">
                   <a-dropdown>
                     <!-- 切换菜单 -->
-                    <a-tag color="purple" @click="e => e.preventDefault()"> 
-                    切换菜单 <a-icon type="down" style="transform: translate(0px, -3px);" class="log-icon" /> 
-                    </a-tag>
+                    <a-tag color="purple" @click="e => e.preventDefault()"> 切换菜单 <a-icon type="down" style="transform: translate(0px, -3px);" class="log-icon" /> </a-tag>
                     <a-menu slot="overlay" @click="handleTabs">
                       <a-menu-item key="1"> <a-icon type="compass" />卡片列表 </a-menu-item>
                       <a-menu-item key="2"> <a-icon type="compass" />最近日志 </a-menu-item>
@@ -137,7 +135,7 @@
                     <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '2'" class="canJoinCard">
                       <a-list-item slot="renderItem" slot-scope="oracleData, index">
                         <!-- 等待加入卡片 -->
-                        <a-card size="small" >
+                        <a-card size="small">
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
                               <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
@@ -745,7 +743,7 @@
       </div>
     </a-modal>
     <!-- 创建提示卡片 -->
-    <a-modal :visible="confirmCreateOracle"  @cancel="()=> confirmCreateOracle = false" title="确认创建信息" @ok="handleCreateOracle">
+    <a-modal :visible="confirmCreateOracle" @cancel="() => (confirmCreateOracle = false)" title="确认创建信息" @ok="handleCreateOracle">
       <p>waitBlock： 【{{ oracle_create_waitblocks }}】</p>
       <p>JoinFee： 【{{ create_joinfee.number }}】 {{ coinName[netWork] }}</p>
       <p>BidFee: 【{{ create_bidFee.number }}】 $NAP for 95% JoinFee</p>
@@ -753,7 +751,7 @@
       <p>Strategy: 【{{ fingers[oracle_myStrategy] }}】</p>
     </a-modal>
     <!-- 加入提示卡片 -->
-    <a-modal :visible="confirmJoinOracle" title="确认加入信息" @ok="handleJoinOracle" @cancel="()=> confirmJoinOracle = false" >
+    <a-modal :visible="confirmJoinOracle" title="确认加入信息" @ok="handleJoinOracle" @cancel="() => (confirmJoinOracle = false)">
       <p>waitBlock： 【{{ joiningOracleWaitBlock }}】</p>
       <p>JoinFee： 【{{ oracle_join_joinfee }}】 {{ coinName[netWork] }}</p>
       <p>BidFee: 【{{ oracle_joing_bidFee }}】 $NAP for 95% JoinFee</p>
@@ -977,7 +975,7 @@ export default {
       joiningOracleID: "",
       joiningOracleCreateAt: "",
       joiningOracleWaitBlock: "",
-      oracle_joing_bidFee: "",
+      oracle_joing_bidFee: 0,
       oracle_join_joinfee: "",
     };
   },
@@ -1028,10 +1026,10 @@ export default {
      */
     updateToastAndShow(title, content) {
       const myDate = new Date();
-      this.timeNow = myDate.toLocaleDateString() + "-" + myDate.toLocaleTimeString();
-      this.toastTitle = title;
-      this.toastContent = content;
-      this.openNotification();
+      const timeNow = myDate.toLocaleDateString() + "-" + myDate.toLocaleTimeString();
+      // this.toastTitle = title;
+      // this.toastContent = content;
+      this.openNotification(timeNow, title, content);
     },
     /*
      *@Author: yozora
@@ -1286,9 +1284,6 @@ export default {
       }
       if (this.oracle_myStrategy == 0) {
         message.error("Please select strategy✌✊✋.", 2);
-        return;
-      } else if (this.create_joinfee.number === "" || this.create_joinfee.number === 0) {
-        message.error("Please full joinfee.", 2);
         return;
       } else if (Number(this.create_bidFee.number) > Number(this.napsInWallet1e18) / 1e18) {
         message.error("Insufficient $NAPs in wallet for bid fee.", 2);
@@ -1913,22 +1908,22 @@ export default {
      *@Description: 通知信息
      *@Date: 2021-03-14 15:14:32
      */
-    openNotification() {
+    openNotification(timeNow, title, content) {
       const key = `open${Date.now()}`;
       notification.open({
-      duration:200,
+        duration: 2,
         message: h => (
           <div class="toast-header">
             <img src={require("../assets/nash.png")} class="rounded mr-2" alt="NASH icon" style="width: 1rem;height: 1rem;" />
             <strong class="mr-auto" style="padding-right: 1rem;">
-              {this.toastTitle}
+              {title}
             </strong>
-            <small> @{this.timeNow}</small>
+            <small> @{timeNow}</small>
           </div>
         ),
         description: h => (
           <div class="toast-body" style="white-space: pre-line;">
-            {this.toastContent}
+            {content}
           </div>
         ),
         style: {
@@ -1936,6 +1931,7 @@ export default {
           position: "absolute",
           right: "1rem",
         },
+        closeIcon: h => (<a-icon type="radar-chart" />),
         btn: h => {
           return h(
             "a-button",
@@ -2349,10 +2345,10 @@ export default {
   .ant-layout-content {
     padding: 0px 5px !important;
   }
-  
+
   .right-card {
-      max-width: 100%;
-      min-width: 100% !important;
+    max-width: 100%;
+    min-width: 100% !important;
   }
 
   .right-card .container {
@@ -2361,9 +2357,9 @@ export default {
   }
 
   .left-card {
-      max-width: 100%;
-      min-width: 100% !important;
-      margin-bottom: 10px
+    max-width: 100%;
+    min-width: 100% !important;
+    margin-bottom: 10px;
   }
 
   .neon1 {
@@ -2375,21 +2371,21 @@ export default {
   }
 
   .canJoinCard-card {
-    height: auto !important; 
+    height: auto !important;
   }
 
   .ant-card-grid.ant-card-grid-hoverable {
     margin-left: 50% !important;
-    transform: translate(-50%,0);
+    transform: translate(-50%, 0);
     width: 80% !important;
   }
 
   .logCard {
-    width:100%
+    width: 100%;
   }
 
   .re-item-back {
-    width: 100%
+    width: 100%;
   }
 }
 </style>
