@@ -10,14 +10,16 @@
           <aside>
             <div class="card bg-log">
               <particles-bg style="position: absolute;zIndex: 0; top: 0;left: 0" num="6" type="cobweb" />
-              <div class="card-body">
+              <div class="card-body" style="z-index:1">
                 <!-- 散点图 -->
                 <Charts :historyLogs="historyLogs" :chartTitle="chartTitle" style="height: 300px"></Charts>
                 <!-- 菜单tab -->
                 <div style="text-align: left">
                   <a-dropdown>
                     <!-- 切换菜单 -->
-                    <a-tag color="purple" @click="e => e.preventDefault()"> 切换菜单 <a-icon type="down" style="transform: translate(0px, -3px);" class="log-icon" /> </a-tag>
+                    <a-tag color="purple" @click="e => e.preventDefault()"> 
+                    切换菜单 <a-icon type="down" style="transform: translate(0px, -3px);" class="log-icon" /> 
+                    </a-tag>
                     <a-menu slot="overlay" @click="handleTabs">
                       <a-menu-item key="1"> <a-icon type="compass" />卡片列表 </a-menu-item>
                       <a-menu-item key="2"> <a-icon type="compass" />最近日志 </a-menu-item>
@@ -29,7 +31,7 @@
                     </a-menu>
                   </a-dropdown>
                 </div>
-                <a-tabs :activeKey="activeKey" @change="callback" class="strategy-tabs" size="large" animated>
+                <a-tabs :activeKey="activeKey" @change="callback" class="strategy-tabs" animated>
                   <!-- 大厅 -->
                   <a-tab-pane v-if="tabMode === 1" key="0" disabled>
                     <a-tag slot="tab" color="purple">
@@ -135,7 +137,7 @@
                     <a-list :grid="{ gutter: 16, column: 2 }" :data-source="myLogs" v-if="activeKey === '2'" class="canJoinCard">
                       <a-list-item slot="renderItem" slot-scope="oracleData, index">
                         <!-- 等待加入卡片 -->
-                        <a-card size="small">
+                        <a-card size="small" >
                           <a-card-meta style="text-align:left;font-weight: bold;margin-top: 10px">
                             <template slot="title">
                               <span style="font-weight: bold">#{{ oracleData.OracleID }}</span>
@@ -743,7 +745,7 @@
       </div>
     </a-modal>
     <!-- 创建提示卡片 -->
-    <a-modal :visible="confirmCreateOracle" title="确认创建信息" @ok="handleCreateOracle">
+    <a-modal :visible="confirmCreateOracle"  @cancel="()=> confirmCreateOracle = false" title="确认创建信息" @ok="handleCreateOracle">
       <p>waitBlock： 【{{ oracle_create_waitblocks }}】</p>
       <p>JoinFee： 【{{ create_joinfee.number }}】 {{ coinName[netWork] }}</p>
       <p>BidFee: 【{{ create_bidFee.number }}】 $NAP for 95% JoinFee</p>
@@ -751,7 +753,7 @@
       <p>Strategy: 【{{ fingers[oracle_myStrategy] }}】</p>
     </a-modal>
     <!-- 加入提示卡片 -->
-    <a-modal :visible="confirmJoinOracle" title="确认加入信息" @ok="handleJoinOracle">
+    <a-modal :visible="confirmJoinOracle" title="确认加入信息" @ok="handleJoinOracle" @cancel="()=> confirmJoinOracle = false" >
       <p>waitBlock： 【{{ joiningOracleWaitBlock }}】</p>
       <p>JoinFee： 【{{ oracle_join_joinfee }}】 {{ coinName[netWork] }}</p>
       <p>BidFee: 【{{ oracle_joing_bidFee }}】 $NAP for 95% JoinFee</p>
@@ -1914,7 +1916,7 @@ export default {
     openNotification() {
       const key = `open${Date.now()}`;
       notification.open({
-        duration: 200,
+      duration:200,
         message: h => (
           <div class="toast-header">
             <img src={require("../assets/nash.png")} class="rounded mr-2" alt="NASH icon" style="width: 1rem;height: 1rem;" />
@@ -2202,14 +2204,6 @@ export default {
   margin-top: -1px;
 }
 
-.strategy-tabs >>> .ant-tabs-tab-next.ant-tabs-tab-arrow-show,
-.strategy-tabs >>> .ant-tabs-tab-prev.ant-tabs-tab-arrow-show {
-  color: purple;
-  font-family: "Pacifico";
-  text-transform: uppercase;
-  animation: shining 0.2s alternate infinite;
-}
-
 .strategy-tabs >>> .ant-card.ant-card-bordered.ant-card-contain-grid.ant-card-small,
 .ant-card.ant-card-bordered.ant-card-small {
   border-radius: 10px;
@@ -2234,6 +2228,10 @@ export default {
   height: 1px;
   margin: 21px 0;
 }
+
+/* .strategy-tabs >>> .ant-tabs-tab.ant-tabs-tab-disabled{
+  background-color:rgba(242, 242, 242, 1);
+} */
 
 .strategy-tabs >>> .ant-card-meta-avatar {
   margin-right: 3.5em;
@@ -2281,6 +2279,11 @@ export default {
 .bg-card.padding-box >>> .ant-divider.ant-divider-vertical {
   height: 2em;
   margin: 1em;
+}
+
+.card-shadow {
+  /* box-shadow: 2px 2px 5px 5px #8f8787;
+  border-radius: 10px; */
 }
 
 .card-body >>> .ant-card-meta-avatar {
@@ -2335,18 +2338,6 @@ export default {
   transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
 }
-
-@keyframes shining {
-  from {
-    text-shadow: 0 0 6px rgba(182, 211, 207, 0.9), 0 0 30px rgba(182, 211, 207, 0.3), 0 0 12px rgba(15, 115, 223, 0.5), 0 0 21px rgba(15, 115, 223, 0.9), 0 0 34px rgba(15, 115, 223, 0.8),
-      0 0 54px rgba(15, 115, 223, 0.9);
-  }
-  to {
-    text-shadow: 0 0 6px rgba(182, 211, 207, 1), 0 0 30px rgba(182, 211, 207, 0.4), 0 0 12px rgba(15, 115, 223, 0.6), 0 0 22px rgba(15, 115, 223, 0.8), 0 0 38px rgba(15, 115, 223, 0.9),
-      0 0 60px rgba(15, 115, 223, 1);
-  }
-}
-
 @media screen and (max-width: 1174px) {
   .row {
     margin-right: 0px;
@@ -2358,10 +2349,10 @@ export default {
   .ant-layout-content {
     padding: 0px 5px !important;
   }
-
+  
   .right-card {
-    max-width: 100%;
-    min-width: 100% !important;
+      max-width: 100%;
+      min-width: 100% !important;
   }
 
   .right-card .container {
@@ -2370,9 +2361,9 @@ export default {
   }
 
   .left-card {
-    max-width: 100%;
-    min-width: 100% !important;
-    margin-bottom: 10px;
+      max-width: 100%;
+      min-width: 100% !important;
+      margin-bottom: 10px
   }
 
   .neon1 {
@@ -2384,17 +2375,17 @@ export default {
   }
 
   .canJoinCard-card {
-    height: auto !important;
+    height: auto !important; 
   }
 
   .ant-card-grid.ant-card-grid-hoverable {
     margin-left: 50% !important;
-    transform: translate(-50%, 0);
+    transform: translate(-50%,0);
     width: 80% !important;
   }
 
   .logCard {
-    width: 100%;
+    width:100%
   }
 
   .re-item-back {
