@@ -670,7 +670,7 @@
     </div>
 
     <!-- 等待卡片 -->
-    <a-modal :visible="staticBackdropPending" :footer="null" :closable="false" centered id="staticBackdropPending" style="position: fixed;top:30%;z-index;">
+    <a-modal :visible="staticBackdropPending" :footer="null" :closable="false" centered id="staticBackdropPending" style="position: fixed;top:30%;z-index: 1;">
       <div>
         <div>
           <div class="modal-header">
