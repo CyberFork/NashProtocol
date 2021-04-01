@@ -670,7 +670,11 @@
     </div>
 
     <!-- 等待卡片 -->
+<<<<<<< HEAD
     <a-modal :visible="staticBackdropPending" :footer="null" :closable="false" centered id="staticBackdropPending" style="position: fixed;top:30%">
+=======
+    <a-modal :visible="staticBackdropPending" :footer="null" :closable="false" centered id="staticBackdropPending"  class="modal-a">
+>>>>>>> b025bca... fix(code): save
       <div>
         <div>
           <div class="modal-header">
@@ -703,7 +707,7 @@
       </div>
     </a-modal>
     <!-- 仲裁卡片 -->
-    <a-modal :visible="staticBackdropAnnealed" :footer="null" :closable="false" centered id="staticBackdropAnnealed" style="position: fixed;top:30%">
+    <a-modal :visible="staticBackdropAnnealed" :footer="null" :closable="false" centered id="staticBackdropAnnealed" class="modal-a">
       <div>
         <div>
           <div class="modal-header">
@@ -724,7 +728,7 @@
       </div>
     </a-modal>
     <!-- 加入卡片 -->
-    <a-modal :visible="staticBackdropJoined" :footer="null" :closable="false" centered id="staticBackdropJoined" style="position: fixed;top:30%">
+    <a-modal :visible="staticBackdropJoined" :footer="null" :closable="false" centered id="staticBackdropJoined" class="modal-a">
       <div>
         <div>
           <div class="modal-header">
@@ -2082,6 +2086,10 @@ export default {
 </script>
 
 <style scoped>
+.modal-a{
+  position: fixed;top:30%;z-index: 1;
+}
+
 .bg-log {
   background: rgb(255, 251, 240);
   /* background-color:#4CC8CA; */
