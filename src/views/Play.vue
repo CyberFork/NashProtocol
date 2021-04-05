@@ -670,11 +670,7 @@
     </div>
 
     <!-- 等待卡片 -->
-<<<<<<< HEAD
-    <a-modal :visible="staticBackdropPending" :footer="null" :closable="false" centered id="staticBackdropPending" style="position: fixed;top:30%">
-=======
-    <a-modal :visible="staticBackdropPending" :footer="null" :closable="false" centered id="staticBackdropPending"  class="modal-a">
->>>>>>> b025bca... fix(code): save
+    <a-modal :visible="staticBackdropPending" :footer="null" :closable="false" centered id="staticBackdropPending" class="modal-a">
       <div>
         <div>
           <div class="modal-header">
@@ -2086,8 +2082,10 @@ export default {
 </script>
 
 <style scoped>
-.modal-a{
-  position: fixed;top:30%;z-index: 1;
+.modal-a {
+  position: fixed;
+  top: 30%;
+  z-index: 1;
 }
 
 .bg-log {
